@@ -1,3 +1,4 @@
+const backend_url = 'http://localhost:3000'
 let form = document.querySelector('#registration-form');
 form.addEventListener('submit', registerUser);
 
@@ -13,7 +14,7 @@ function showError(err){
 }
 
 
-function registerUser(e){
+async function registerUser(e){
     e.preventDefault();
     try{
         let signUpObj = {
@@ -22,17 +23,18 @@ function registerUser(e){
             password: e.target.password.value
         } 
         e.target.reset();
-        console.log(signUpObj);
-
-        const res = axios.post('http:localhost:300/user/signup', signUpObj);
-        console.log(res.status)
-        if(res.status===201)
+      
+        const res = await axios.post(`${backend_url}/user/signup`, signUpObj);
+        console.log(res)
+        if(res.status===200)
             window.location.href = '../login/login.html';
-        else
-            throw new Error('Failed to register');
+        else{
+            // console.log(res.data);
+            throw new Error(res.data.error);
+        }
     }
     catch(err){
-        console.log(err);
-        showError('Failed to register');
+        // console.log(err);
+        showError(err.message);
     }
 }
