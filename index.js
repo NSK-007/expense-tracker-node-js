@@ -23,18 +23,17 @@ async function registerUser(e){
             password: e.target.password.value
         } 
         e.target.reset();
-      
-        const res = await axios.post(`${backend_url}/user/signup`, signUpObj);
-        console.log(res)
+        let res = await axios.post(`${backend_url}/user/signup`, signUpObj);
+        console.log(res);
         if(res.status===200)
             window.location.href = '../login/login.html';
         else{
-            // console.log(res.data);
+            // console.log(res.data.error);
             throw new Error(res.data.error);
         }
     }
     catch(err){
-        // console.log(err);
+        // console.log(err.message);
         showError(err.message);
     }
 }
