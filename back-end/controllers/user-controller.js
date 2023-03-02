@@ -1,17 +1,19 @@
 const User = require("../models/user-model");
+const bcrypt = require('bcrypt');
 
-exports.signUpController = async (req, res, next) => {
+exports.signUpUser = async (req, res, next) => {
     try{
-        let user = await User.findAll({where:{email:req.body.email}})
+        const {name, email, password} = req.body;
+        let user = await User.findAll({where:{email: email}})
         if(user.length>0)
             throw new Error('User already exists');
 
-        user = await User.create({
-            name: req.body.name,
-            email: req.body.email,
-            password: req.body.password
-        });
-        res.status(200).json(user);
+        const saltrounds = 10;
+        bcrypt.hash(password, saltrounds, async (err, hash) => {
+            console.log(err);
+            await User.create({name, email, password: hash});
+            res.status(200).json({success:true, message:'User successfully registered'}); 
+        })
     }
     catch(err){
         res.status(201).send({success:false, error:'User already exists'});
@@ -20,20 +22,18 @@ exports.signUpController = async (req, res, next) => {
 
 exports.loginUser = async (req, res, next) => {
     try{
-        let user = await User.findAll({where:{email:req.body.email}});
+        const {email, password} = req.body;
+        let user = await User.findAll({where:{email:email}});
         if(user.length>0){
-            let user_password = await User.findAll({where:{password:req.body.password}});
-            // console.log(user_password);
-            if(user_password.length==0)
+           let flag = await bcrypt.compare(password, user[0].password);
+           if(!flag)
                 throw new Error('Incorrect Password');
-            // console.log('user logged in');
-            res.status(200).json({success:true, message:'Login Successfull'});
+            res.status(200).json({success:true, message:'Login Successful'});
         }
         else
             throw new Error('Incorrect mail/user doesn\'t exist');
     }
     catch(err){
-        // console.log(err.message);
         res.status(201).send({success:false, error:err.message});
     }
 }

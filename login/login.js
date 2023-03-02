@@ -44,7 +44,7 @@ async function loginUser(e){
         }
     }
     catch(err){
-        // console.log(err);
-        showError(err);
+        console.log(err.message);
+        showError(err.message);
     }
 }
