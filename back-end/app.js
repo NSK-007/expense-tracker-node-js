@@ -11,6 +11,7 @@ app.use(bodyParser.json({extended:false}));
 app.use('/user', router);
 
 sequelize
+    // .sync({force:true})
     .sync()
     .then(() => {
         app.listen(3000);

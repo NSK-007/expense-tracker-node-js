@@ -41,6 +41,7 @@ async function loginUser(e){
         }
         else{
             showSuccess(res.data.message);
+            window.location.href = '../expenses/add-expense.html'
         }
     }
     catch(err){
