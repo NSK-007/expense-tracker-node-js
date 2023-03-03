@@ -1,8 +1,10 @@
 const Expense = require("../models/expense-model");
+const User = require("../models/user-model");
 
-exports.getAllExpenses = async (req, res, next) => {
+exports.getUserExpenses = async (req, res, next) => {
     try{
-        const expenses = await Expense.findAll();  
+        // console.log(req.user);
+        const expenses = await Expense.findAll({where: {userId: req.user.id}});  
         res.status(200).json(expenses);
     }
     catch(err){
@@ -14,11 +16,14 @@ exports.getAllExpenses = async (req, res, next) => {
 exports.addExpense = async (req, res, next) => {
     try{
         const {amount, description, type} = req.body;
-        let expense = await Expense.create({amount, description, type});
+        const currentUser = req.user;
+        // console.log(typeof amount);
+        // let expense = await Expense.create({amount, description, type});
+        let expense = await currentUser.createExpense({amount, description, type});
         res.status(200).json(expense);
     }
     catch(err){
-        // console.log(err);
+        console.log(err);
         res.status(201).send({success: false, error: 'Please Enter number for amount'});
     }
 }

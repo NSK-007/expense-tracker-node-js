@@ -37,9 +37,10 @@ async function loginUser(e){
         let res = await axios.post(`${BACKEND_URL}/user/loginUser`, loginObj);
         if(res.status!==200){
             // console.log(res);
-            throw new Error(res.data.error)
+            throw new Error(res.data.error);
         }
         else{
+            localStorage.setItem('token', res.data.token);
             showSuccess(res.data.message);
             window.location.href = '../expenses/add-expense.html'
         }

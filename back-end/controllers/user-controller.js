@@ -1,5 +1,6 @@
 const User = require("../models/user-model");
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 exports.signUpUser = async (req, res, next) => {
     try{
@@ -20,6 +21,10 @@ exports.signUpUser = async (req, res, next) => {
     }
 }
 
+function generateToken(user){
+    return jwt.sign({id: user.id, name: user.name} , 'MySecretKeyIsYouDontKnow');
+}
+
 exports.loginUser = async (req, res, next) => {
     try{
         const {email, password} = req.body;
@@ -28,7 +33,9 @@ exports.loginUser = async (req, res, next) => {
            let flag = await bcrypt.compare(password, user[0].password);
            if(!flag)
                 throw new Error('Incorrect Password');
-            res.status(200).json({success:true, message:'Login Successful'});
+            const token = generateToken(user[0]);
+            res.status(200).json({success:true, message:'Login Successful', token: token});
+            // console.log(jwt.decode(token));
         }
         else
             throw new Error('Incorrect mail/user doesn\'t exist');

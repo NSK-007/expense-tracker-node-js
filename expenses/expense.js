@@ -24,6 +24,8 @@ form.addEventListener('submit', addExpense);
 function createNewLi(id, amount, type, desc){
     let li = document.createElement('li');
     li.className  = 'list-group-item';
+    li.style.border = '2px solid'
+    li.style.borderStyle = 'outset';
 
     //delete button
     var deleteBtn = document.createElement('button');
@@ -58,12 +60,15 @@ async function addExpense(e){
         description: e.target.description.value,
         type: e.target.type.value
     }
+    console.log(typeof expense.amount);
     if (containsOnlySpaces(expense.amount) || containsOnlySpaces(expense.description) || expense.description == null || expense.description == '' || expense.amount == null || expense.amount == '' || expense.type == null || expense.type == '') {
         showError('Please enter the fields properly');
         return;
      }
      try{
-        let res = await axios.post(`${backend_url}/user/add-expense`, expense);
+        const token = localStorage.getItem('token');
+        console.log(token);
+        let res = await axios.post(`${backend_url}/user/add-expense`,expense, {headers: {"Authorization": token}});
         // console.log(res);
         if(res.status!==200)
             throw new Error(res.data.error);
@@ -79,14 +84,17 @@ async function addExpense(e){
 
 async function getExpenses(){
     try{
-        let items = await axios.get(`${backend_url}/user/`);
+        const token = localStorage.getItem('token');
+        let items = await axios.get(`${backend_url}/user/get-expenses`, {headers: {"Authorization": token}});
+        if(items.status !== 200)
+            throw new Error(items.data.error);
         for(let i=0;i<items.data.length;i++){
             let li = createNewLi(items.data[i].id, items.data[i].amount, items.data[i].type, items.data[i].description);
             itemList.appendChild(li);
         }
     }
     catch(err){
-        showError(err)
+        showError(err.message);
     }
 }
 
@@ -96,8 +104,9 @@ async function deleteExpense(e){
         const id = e.target.id.substring(6);
         // console.log(id);
         itemList.removeChild(li);
+        const token = localStorage.getItem('token');
         try{
-            await axios.delete(`${backend_url}/user/expense/delete-expense/${id}`);
+            await axios.delete(`${backend_url}/user/expense/delete-expense/${id}`, {headers: {"Authorization": token}});
         }
         catch(err){
             showError('delete didn\'t happen');
