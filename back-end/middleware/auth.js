@@ -4,7 +4,7 @@ const User = require('../models/user-model');
 const authenticate = async (req, res, next) => {
     try{
         const token = req.header('Authorization');
-        console.log(token);
+        // console.log(token);
         // const userId = Number(jwt.verify(token, process.env.TOKEN_SECRET));
         const LoggedInUser = jwt.verify(token, 'MySecretKeyIsYouDontKnow');
         
