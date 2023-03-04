@@ -1,5 +1,4 @@
 const Expense = require("../models/expense-model");
-const User = require("../models/user-model");
 
 exports.getUserExpenses = async (req, res, next) => {
     try{

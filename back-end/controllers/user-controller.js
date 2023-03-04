@@ -1,6 +1,7 @@
 const User = require("../models/user-model");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 exports.signUpUser = async (req, res, next) => {
     try{
@@ -12,7 +13,7 @@ exports.signUpUser = async (req, res, next) => {
         const saltrounds = 10;
         bcrypt.hash(password, saltrounds, async (err, hash) => {
             console.log(err);
-            await User.create({name, email, password: hash});
+            await User.create({name, email, password: hash, isPremiumUser: false});
             res.status(200).json({success:true, message:'User successfully registered'}); 
         })
     }
@@ -22,7 +23,8 @@ exports.signUpUser = async (req, res, next) => {
 }
 
 function generateToken(user){
-    return jwt.sign({id: user.id, name: user.name} , 'MySecretKeyIsYouDontKnow');
+    console.log(process.env.TOKEN_SECRET);
+    return jwt.sign({id: user.id, name: user.name} , process.env.TOKEN_SECRET);
 }
 
 exports.loginUser = async (req, res, next) => {

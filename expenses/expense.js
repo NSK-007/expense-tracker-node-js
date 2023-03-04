@@ -1,8 +1,12 @@
 let form = document.querySelector('#form-id');
 let backend_url = 'http://localhost:3000';
 let itemList = document.querySelector('#items');
+// const razor_payment_id = 
 document.addEventListener('DOMContentLoaded', getExpenses);
 itemList.addEventListener('click', deleteExpense);
+
+let premium_btn = document.querySelector('#premium');
+premium_btn.addEventListener('click', takePremium);
 
 function containsOnlySpaces(str) {
     return str.trim().length === 0;
@@ -11,6 +15,17 @@ function containsOnlySpaces(str) {
 function showError(err){
     let err_div = document.querySelector('#error');
     err_div.className = 'alert alert-danger';
+    err_div.innerHTML = err;
+
+    setTimeout(function () {
+        err_div.className = '';
+        err_div.innerHTML = '';
+    }, 3000);
+}
+
+function showSuccess(err){
+    let err_div = document.querySelector('#error');
+    err_div.className = 'alert alert-success';
     err_div.innerHTML = err;
 
     setTimeout(function () {
@@ -112,4 +127,39 @@ async function deleteExpense(e){
             showError('delete didn\'t happen');
         }
     }
+}
+
+async function takePremium(e){
+    const token = localStorage.getItem('token');
+    try{
+        const res = await axios.get(`${backend_url}/purchase/premium-membership`, {headers: {"Authorization": token}});
+        console.log(res);
+        if(res.status!==200)
+            throw new Error(res.data.error);
+
+        var options = {
+            "key": res.data.key_id,
+            "order_id": res.data.new_order.orderId,
+            "handler": async (res) => {
+                // console.log(res);
+                await axios.post(`${backend_url}/purchase/update-transaction-status`, {
+                    order_id: options.order_id,
+                    payment_id: res.razorpay_payment_id,
+                }, {headers: {"Authorization": token}});
+                
+                showSuccess('You are a premium user now');
+            }
+        }
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+        e.preventDefault();
+
+        rzp1.on('payment.failed', function (response){
+            showError('Payment Failed');
+        })
+    }
+    catch(err){
+        showError(err.message);
+    }
+   
 }
