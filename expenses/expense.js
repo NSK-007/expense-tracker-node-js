@@ -154,7 +154,11 @@ async function takePremium(e){
         rzp1.open();
         e.preventDefault();
 
-        rzp1.on('payment.failed', function (response){
+        rzp1.on('payment.failed', async function (response){
+            await axios.post(`${backend_url}/purchase/update-transaction-status`, {
+                order_id: options.order_id,
+                payment_id: null,
+            }, {headers: {"Authorization": token}})
             showError('Payment Failed');
         })
     }
