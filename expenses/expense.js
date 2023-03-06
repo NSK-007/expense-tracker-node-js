@@ -1,9 +1,16 @@
 let form = document.querySelector('#form-id');
 let backend_url = 'http://localhost:3000';
 let itemList = document.querySelector('#items');
-// const razor_payment_id = 
+let logout = document.querySelector('#logout_btn');
+let leaderboard = document.querySelector('#leader-board');
+
+document.addEventListener('DOMContentLoaded', checkAuthentication);
+document.addEventListener('DOMContentLoaded', checkPremium);
 document.addEventListener('DOMContentLoaded', getExpenses);
+
 itemList.addEventListener('click', deleteExpense);
+logout.addEventListener('click', logOut);
+leaderboard.addEventListener('click', showLeaderBoard);
 
 let premium_btn = document.querySelector('#premium');
 premium_btn.addEventListener('click', takePremium);
@@ -75,14 +82,14 @@ async function addExpense(e){
         description: e.target.description.value,
         type: e.target.type.value
     }
-    console.log(typeof expense.amount);
+    // console.log(typeof expense.amount);
     if (containsOnlySpaces(expense.amount) || containsOnlySpaces(expense.description) || expense.description == null || expense.description == '' || expense.amount == null || expense.amount == '' || expense.type == null || expense.type == '') {
         showError('Please enter the fields properly');
         return;
      }
      try{
         const token = localStorage.getItem('token');
-        console.log(token);
+        // console.log(token);
         let res = await axios.post(`${backend_url}/user/add-expense`,expense, {headers: {"Authorization": token}});
         // console.log(res);
         if(res.status!==200)
@@ -131,6 +138,7 @@ async function deleteExpense(e){
 
 async function takePremium(e){
     const token = localStorage.getItem('token');
+    console.log('premium starting')
     try{
         const res = await axios.get(`${backend_url}/purchase/premium-membership`, {headers: {"Authorization": token}});
         console.log(res);
@@ -166,4 +174,66 @@ async function takePremium(e){
         showError(err.message);
     }
    
+}
+
+function checkAuthentication(){
+    const token = localStorage.getItem('token');
+    if(token!=null){
+        let logout = document.querySelector('#logout_btn');
+        let login = document.querySelector('#login_btn');
+        login.style.display = 'none';
+        logout.style.display = 'block';
+    }
+}
+
+async function checkPremium(){
+    try{
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${backend_url}/user/check-premium`, {headers: {"Authorization": token}});
+        // console.log(res);
+        if(res.data.success){
+            document.querySelector('#premium').innerHTML = 'Premium User';
+            leaderboard.style.display = 'block';
+        }
+    }
+    catch(err){
+        console.log(err);
+    }
+}
+
+function createNewTableRows(user){
+    let table_body = document.querySelector('#table-body');
+    let tr = document.createElement('tr');
+    let td1 = document.createElement('td');
+    let td2 = document.createElement('td');
+    let value1 = document.createTextNode(`${user.name}`);
+    let value2 = document.createTextNode(`${user['SUM(amount)']}`);
+    td1.appendChild(value1);
+    td2.appendChild(value2);
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+
+    table_body.appendChild(tr);
+}
+
+async function showLeaderBoard(){
+    try{
+        const token = localStorage.getItem('token');
+        let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard`, {headers: {"Authorization": token}});
+        console.log(leaderboard_details.data.expense_user);
+        let users = leaderboard_details.data.expense_user;
+        for(let i=0;i<users.length;i++){
+            createNewTableRows(users[i])
+        }
+
+        document.querySelector('#leader-board-section').style.display = 'block';
+    }
+    catch(err){
+        showError(err.message);
+    }
+}
+
+async function logOut(){
+    localStorage.removeItem('token');
+    window.location.href = '../login/login.html';
 }

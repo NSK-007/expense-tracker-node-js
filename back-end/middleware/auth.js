@@ -9,6 +9,8 @@ const authenticate = async (req, res, next) => {
         // console.log(token);
         // const userId = Number(jwt.verify(token, process.env.TOKEN_SECRET));
         const LoggedInUser = jwt.verify(token, process.env.TOKEN_SECRET);
+        if(!LoggedInUser)
+            throw new Error('Please log in to proceed ')
         
         // console.log(LoggedInUser);
         const user = await User.findByPk(LoggedInUser.id);

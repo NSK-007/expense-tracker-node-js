@@ -46,3 +46,18 @@ exports.loginUser = async (req, res, next) => {
         res.status(201).send({success:false, error:err.message});
     }
 }
+
+exports.checkPremium = async (req, res, next) => {
+    try{
+        currentUser = req.user;
+        // console.log(currentUser);
+        if(currentUser.isPremiumUser)
+            res.status(200).json({success: true, message: 'You are a premium user'});
+        else
+            throw new Error('You are not a premium user');
+    }
+    catch(err){
+        // console.log(err);
+        res.status(201).send({success: false, error: err.message});
+    }
+}

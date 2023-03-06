@@ -25,7 +25,8 @@ exports.purchasePremium = async (req, res, next) => {
 
         const amount = 2500;
 
-        rz_pay.orders.create({amount, currency: "INR"}, async (err, order) => {
+        await rz_pay.orders.create({amount, currency: "INR"}, async (err, order) => {
+            // console.log(order);
             if(err){
                 throw new Error('Transaction Failed');
             }
@@ -52,7 +53,7 @@ exports.updateTransactionStatus = async (req, res, next) => {
         res.status(200).json({success: true, message: 'Transaction Successful'});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
         res.status(201).send({success:false, message: err.message});
     }
 }

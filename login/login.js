@@ -1,6 +1,6 @@
 let BACKEND_URL = `http://localhost:3000`
 let form = document.querySelector('#login-form');
-
+document.addEventListener('DOMContentLoaded', checkAuthentication);
 form.addEventListener('submit', loginUser);
 
 function showError(err){
@@ -48,5 +48,11 @@ async function loginUser(e){
     catch(err){
         console.log(err.message);
         showError(err.message);
+    }
+}
+function checkAuthentication(){
+    const token = localStorage.getItem('token');
+    if(token!=null){
+        window.location.href = '../expenses/add-expense.html';
     }
 }

@@ -29,7 +29,8 @@
               <button class="nav-link btn" id="premium" style="color: goldenrod; font-weight: bold;" tabindex="-1">Buy Premium</button>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="../login/login.html">Login</a>
+              <a id="login_btn" class="nav-link" href="../login/login.html">Login</a>
+              <a id="logout_btn" style="display: none;" class="nav-link" href="#">Logout</a>
             </li>
           </ul>
         </div>
@@ -53,11 +54,26 @@
                 <input id="update_exp" type="button" name="update_btn" class="btn btn-primary" value="Update" style="display:none;">
             </form><br>
             <h2>Expenses</h2>
-            <ul id="items" class="list-group">
-                
-            </ul>
+            <ul id="items" class="list-group"></ul>
+            <br>
+            <button id="leader-board" class="btn btn-info btn-md col-3" style="display: none;">Show Leaderboard</button>
+            <div id="leader-board-section" style="display: none;">
+              <hr style="border: 2px solid rgb(17, 1, 1);">
+              <h3>LeaderBoard</h3>
+              <table class="table table-striped" caption="LeaderBoard">
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Total Expense</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+              </table>
+          </div>
         </div>
     </div>
+
     <script src="./expense.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

@@ -2,6 +2,8 @@ const backend_url = 'http://localhost:3000'
 let form = document.querySelector('#registration-form');
 form.addEventListener('submit', registerUser);
 
+document.addEventListener('DOMContentLoaded', checkAuthentication);
+
 function containsOnlySpaces(str) {
     return str.trim().length === 0;
   }
@@ -46,4 +48,10 @@ async function registerUser(e){
         // console.log(err.message);
         showError(err.message);
     }
+}
+
+function checkAuthentication(){
+    const token = localStorage.getItem('token');
+    if(token!=null)
+        window.location.href = '../expenses/add-expense.html';
 }
