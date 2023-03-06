@@ -207,7 +207,7 @@ function createNewTableRows(user){
     let td1 = document.createElement('td');
     let td2 = document.createElement('td');
     let value1 = document.createTextNode(`${user.name}`);
-    let value2 = document.createTextNode(`${user['SUM(amount)']}`);
+    let value2 = document.createTextNode(`${user.total_sum}`);
     td1.appendChild(value1);
     td2.appendChild(value2);
     tr.appendChild(td1);
@@ -220,7 +220,7 @@ async function showLeaderBoard(){
     try{
         const token = localStorage.getItem('token');
         let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard`, {headers: {"Authorization": token}});
-        console.log(leaderboard_details.data.expense_user);
+        // console.log(leaderboard_details.data.expense_user);
         let users = leaderboard_details.data.expense_user;
         for(let i=0;i<users.length;i++){
             createNewTableRows(users[i])
