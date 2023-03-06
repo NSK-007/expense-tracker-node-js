@@ -207,7 +207,7 @@ function createNewTableRows(user){
     let td1 = document.createElement('td');
     let td2 = document.createElement('td');
     let value1 = document.createTextNode(`${user.name}`);
-    let value2 = document.createTextNode(`${user.total_sum}`);
+    let value2 = document.createTextNode(`${user.totalExpense}`);
     td1.appendChild(value1);
     td2.appendChild(value2);
     tr.appendChild(td1);

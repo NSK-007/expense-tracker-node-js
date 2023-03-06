@@ -25,9 +25,9 @@ exports.purchasePremium = async (req, res, next) => {
 
         const amount = 2500;
 
-        await rz_pay.orders.create({amount, currency: "INR"}, async (err, order) => {
-            // console.log(order);
+        rz_pay.orders.create({amount, currency: "INR"}, async (err, order) => {
             if(err){
+                console.log(err)
                 throw new Error('Transaction Failed');
             }
             let new_order = await req.user.createOrder({orderId: order.id, status: 'PENDING'});

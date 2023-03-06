@@ -13,7 +13,7 @@ exports.signUpUser = async (req, res, next) => {
         const saltrounds = 10;
         bcrypt.hash(password, saltrounds, async (err, hash) => {
             console.log(err);
-            await User.create({name, email, password: hash, isPremiumUser: false});
+            await User.create({name, email, password: hash, isPremiumUser: false, totalExpense: 0});
             res.status(200).json({success:true, message:'User successfully registered'}); 
         })
     }
