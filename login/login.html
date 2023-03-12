@@ -37,7 +37,7 @@
             <div class="card-body">
               <h1 class="card-title">Expense Tracker</h1>
               <br><br>
-              <h2>Login.</h2>
+              <h2>Login</h2>
               <br>
               <div id="error"></div>
               <form id="login-form">
@@ -53,7 +53,8 @@
                     <input type="password" class="form-control" id="password" name="password" required>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-info btn-md text-white">Login</button>
+                  <button type="submit" class="btn btn-outline-info btn-md">Login</button>&nbsp;&nbsp;
+                  <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#forgotPassword">Forgot Password?</button>
               </form><br>
               <hr>
               <div class="row">
@@ -64,6 +65,33 @@
               </div>
             </div>
           </div>
+
+          <div class="modal fade" id="forgotPassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="staticBackdropLabel">Reset Password</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="reset-form">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                      <label for="email" class="col-sm-2 offset-1 col-form-label">Email</label>
+                      <div class="col-6 offset-1">
+                        <input type="email" class="form-control" id="reset-email" name="reset-email" required placeholder="Enter email">
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Reset</button>
+                </div>
+              </form> 
+
+              </div>
+            </div>
+          </div>
+
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
     <script src="login.js"></script>

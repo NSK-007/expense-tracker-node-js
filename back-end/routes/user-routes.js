@@ -7,6 +7,8 @@ UserRouter.post('/signup', UserController.signUpUser);
 
 UserRouter.post('/loginUser', UserController.loginUser);
 
+UserRouter.post('/password/forgot-password', UserController.resetPassword);
+
 UserRouter.get('/check-premium', authenticate, UserController.checkPremium);
 
 module.exports = UserRouter;

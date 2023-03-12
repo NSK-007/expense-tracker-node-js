@@ -68,3 +68,13 @@ exports.checkPremium = async (req, res, next) => {
         res.status(201).send({success: false, error: err.message});
     }
 }
+
+exports.resetPassword = async (req, res, next) => {
+    try{
+        // currentUser = req.user;
+        console.log('Backend called');
+    }
+    catch(err){
+        console.log(err)
+    }
+}
