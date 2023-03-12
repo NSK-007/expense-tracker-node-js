@@ -1,23 +1,28 @@
 const User = require("../models/user-model");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const sequelize = require("../util/database");
 require('dotenv').config();
 
 exports.signUpUser = async (req, res, next) => {
+    let t = await sequelize.transaction();
     try{
         const {name, email, password} = req.body;
-        let user = await User.findAll({where:{email: email}})
+        let user = await User.findAll({where:{email: email}, transaction: t})
         if(user.length>0)
             throw new Error('User already exists');
 
         const saltrounds = 10;
         bcrypt.hash(password, saltrounds, async (err, hash) => {
             console.log(err);
-            await User.create({name, email, password: hash, isPremiumUser: false, totalExpense: 0});
+            await User.create({name, email, password: hash, isPremiumUser: false, totalExpense: 0}, {transaction: t});
+            await t.commit();
             res.status(200).json({success:true, message:'User successfully registered'}); 
         })
     }
     catch(err){
+        console.log(err);
+        await t.rollback();
         res.status(201).send({success:false, error:'User already exists'});
     }
 }
@@ -28,9 +33,10 @@ function generateToken(user){
 }
 
 exports.loginUser = async (req, res, next) => {
+    let t = await sequelize.transaction();
     try{
         const {email, password} = req.body;
-        let user = await User.findAll({where:{email:email}});
+        let user = await User.findAll({where:{email:email}, transaction: t});
         if(user.length>0){
            let flag = await bcrypt.compare(password, user[0].password);
            if(!flag)
@@ -43,6 +49,7 @@ exports.loginUser = async (req, res, next) => {
             throw new Error('Incorrect mail/user doesn\'t exist');
     }
     catch(err){
+        console.log(err)
         res.status(201).send({success:false, error:err.message});
     }
 }

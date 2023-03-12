@@ -97,6 +97,8 @@ async function addExpense(e){
         form.reset();
         let li = createNewLi(res.data.id, res.data.amount, res.data.type, res.data.description);
         itemList.appendChild(li);
+        let lb_section = document.querySelector('#leader-board-section');
+        lb_section.style.display = 'none';
      }
      catch(err){
         console.log(err.message);
@@ -129,6 +131,8 @@ async function deleteExpense(e){
         const token = localStorage.getItem('token');
         try{
             await axios.delete(`${backend_url}/user/expense/delete-expense/${id}`, {headers: {"Authorization": token}});
+            let lb_section = document.querySelector('#leader-board-section');
+            lb_section.style.display = 'none';
         }
         catch(err){
             showError('delete didn\'t happen');
@@ -218,6 +222,10 @@ function createNewTableRows(user){
 
 async function showLeaderBoard(){
     try{
+        console.log('leaderboard')
+        let lb_section = document.querySelector('#leader-board-section');
+        let t_body = document.querySelector('#table-body');
+        t_body.innerHTML = '';
         const token = localStorage.getItem('token');
         let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard`, {headers: {"Authorization": token}});
         // console.log(leaderboard_details.data.expense_user);
@@ -226,7 +234,7 @@ async function showLeaderBoard(){
             createNewTableRows(users[i])
         }
 
-        document.querySelector('#leader-board-section').style.display = 'block';
+        lb_section.style.display = 'block';
     }
     catch(err){
         showError(err.message);
