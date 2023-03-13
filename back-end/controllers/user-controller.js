@@ -2,6 +2,7 @@ const User = require("../models/user-model");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sequelize = require("../util/database");
+// const SIB = require('sib-api-v3-sdk');
 require('dotenv').config();
 
 exports.signUpUser = async (req, res, next) => {
@@ -66,15 +67,5 @@ exports.checkPremium = async (req, res, next) => {
     catch(err){
         // console.log(err);
         res.status(201).send({success: false, error: err.message});
-    }
-}
-
-exports.resetPassword = async (req, res, next) => {
-    try{
-        // currentUser = req.user;
-        console.log('Backend called');
-    }
-    catch(err){
-        console.log(err)
     }
 }
