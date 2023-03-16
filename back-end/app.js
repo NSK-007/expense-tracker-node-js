@@ -9,10 +9,12 @@ const ExpenseRouter = require('./routes/expense-router');
 const PurchaseRouter = require('./routes/purchase-routes');
 const Order = require('./models/order-model');
 const LeaderBoardRouter = require('./routes/leaderboard-router');
+const ForgotPassword = require('./models/forgotpassword-model');
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({extended:false}));
+app.use('/views', express.static('views'));
 
 app.use('/user', UserRouter);
 
@@ -24,8 +26,10 @@ app.use('/premium', LeaderBoardRouter);
 
 Expense.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 Order.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
+ForgotPassword.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
 User.hasMany(Expense);
 User.hasMany(Order);
+User.hasMany(ForgotPassword);
 
 sequelize
     // .sync({force:true})

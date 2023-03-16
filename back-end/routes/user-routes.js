@@ -8,7 +8,11 @@ UserRouter.post('/signup', UserController.signUpUser);
 
 UserRouter.post('/loginUser', UserController.loginUser);
 
-UserRouter.post('/password/forgot-password', PasswordController.resetPassword);
+UserRouter.get('/password/resetpassword/:uuid', PasswordController.resetPassword);
+
+UserRouter.post('/password/forgot-password', PasswordController.sendMail);
+
+UserRouter.post('/password/update-password', PasswordController.updatePassword);
 
 UserRouter.get('/check-premium', authenticate, UserController.checkPremium);
 

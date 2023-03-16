@@ -67,7 +67,10 @@ async function resetPassword(e){
             resetEmail: document.forms['reset-form']['reset-email'].value,
         }
         console.log('resetting password...');
-        await axios.post(`${BACKEND_URL}/user/password/forgot-password`, resetObj);
+        let res = await axios.post(`${BACKEND_URL}/user/password/forgot-password`, resetObj);
+        if(res.status!==200)
+            throw new Error(res.data.error);
+        showSuccess(res.data.message);
     }
     catch(err){
         showError(err.message);

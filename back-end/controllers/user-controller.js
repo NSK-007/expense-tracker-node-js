@@ -29,22 +29,20 @@ exports.signUpUser = async (req, res, next) => {
 }
 
 function generateToken(user){
-    console.log(process.env.TOKEN_SECRET);
     return jwt.sign({id: user.id, name: user.name} , process.env.TOKEN_SECRET);
 }
 
 exports.loginUser = async (req, res, next) => {
-    let t = await sequelize.transaction();
+    // let t = await sequelize.transaction();
     try{
         const {email, password} = req.body;
-        let user = await User.findAll({where:{email:email}, transaction: t});
+        let user = await User.findAll({where:{email:email}});
         if(user.length>0){
            let flag = await bcrypt.compare(password, user[0].password);
            if(!flag)
                 throw new Error('Incorrect Password');
             const token = generateToken(user[0]);
             res.status(200).json({success:true, message:'Login Successful', token: token});
-            // console.log(jwt.decode(token));
         }
         else
             throw new Error('Incorrect mail/user doesn\'t exist');
