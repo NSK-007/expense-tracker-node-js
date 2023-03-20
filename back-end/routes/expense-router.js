@@ -5,6 +5,10 @@ const ExpenseRouter = express.Router();
 
 ExpenseRouter.get('/get-expenses', authenticate, ExpenseController.getUserExpenses);
 
+ExpenseRouter.get('/expenses/monthly-expenses/:month/:year', authenticate, ExpenseController.getMonthlyExpenses);
+
+ExpenseRouter.get('/expenses/yearly-expenses/:year', authenticate, ExpenseController.getYearlyExpenses);
+
 ExpenseRouter.post('/add-expense', authenticate, ExpenseController.addExpense);
 
 ExpenseRouter.delete('/expense/delete-expense/:id', authenticate, ExpenseController.deleteExpense);

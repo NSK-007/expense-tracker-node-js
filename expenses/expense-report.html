@@ -39,11 +39,52 @@
         </div>
       </nav>
       <div class="container" id="report" style="display: none;">
-        <div id="error"></div>
         <h2 class="text-center text" style="color:darkturquoise;">Expenses Report</h2><br><br>
-        <button id="monthly" class="btn btn-outline-info">Download Report - Monthly</button><br><br>
-        <table class="table">
-            <caption>March</caption>
+        <button id="monthly" class="btn btn-outline-info">Download Report - Monthly</button>
+        <!-- <button id="monthly" class="btn btn-outline-info" style="float: right;">Select Month</button> -->
+
+        <div class="btn-group">
+          <select id="yearlist" class="form-select bg-info text-white" aria-label="Default select example">
+            <option selected value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+          </select>
+          <!-- <ul id="yearlist" name="yearlist" class="dropdown-menu" style="background-color: #e3f2fd;" aria-labelledby="defaultDropdown">
+            <li name="2023" class="dropdown-item" value="2023">2023</li>
+            <li name="2022" class="dropdown-item" value="2022">2022</li>
+            <li name="2021" class="dropdown-item" value="2021">2021</li>
+          </ul> -->
+        </div>
+
+
+
+        <div style="float: right;" class="btn-group">
+            <button class="btn btn-info dropdown-toggle" type="button" id="month_btn" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
+              Select Month
+            </button>
+            <ul id="monthlist" name="monthlist" class="dropdown-menu" style="background-color: #e3f2fd;" aria-labelledby="defaultDropdown">
+              <li name="Jan" class="dropdown-item" value="1">January</li>
+              <li name="Feb" class="dropdown-item" value="2">February</li>
+              <li name="Mar" class="dropdown-item" value="3">March</li>
+              <li name="Apr" class="dropdown-item" value="4">April</li>
+              <li name="May" class="dropdown-item" value="5">May</li>
+              <li name="Jun" class="dropdown-item" value="6">June</li>
+              <li name="Jul" class="dropdown-item" value="7">July</li>
+              <li name="Aug" class="dropdown-item" value="8">August</li>
+              <li name="Sep" class="dropdown-item" value="9">September</li>
+              <li name="Oct" class="dropdown-item" value="10">October</li>
+              <li name="Nov" class="dropdown-item" value="11">November</li>
+              <li name="Dec" class="dropdown-item" value="12">December</li>
+
+            </ul>
+          </div>
+
+
+
+        <br><br>
+        <table class="table" id="table_month">
+            <caption id="cap_month">March</caption>
+            <div id="error"></div>
             <thead>
               <tr style="background-color: #e3f2fd;">
                 <th scope="col">Date</th>
@@ -52,69 +93,37 @@
                 <th scope="col">Expense</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>Larry</td>
-                <td>the Bird</td>
-                <td>@twitter</td>
-              </tr>
-              <tr>
-                <th scope="row" colspan="3"></th>
-                <td style="font-weight: bold;">Total: 30000</td>
-              </tr>
-            </tbody>
+            <tbody id="tbody-monthly"></tbody>
           </table>
           <br><br>
-          <button id="yearly" class="btn btn-outline-info">Download Report - Yearly</button><br><br>
+          <button id="yearly" class="btn btn-outline-info">Download Report - Yearly</button>
+
+          <div style="float: right;" class="btn-group">
+            <button class="btn btn-info dropdown-toggle" type="button" id="month_btn" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
+              Select Year
+            </button>
+            <ul id="yearlist2" name="yearlist2" class="dropdown-menu" style="background-color: #e3f2fd;" aria-labelledby="defaultDropdown">
+              <li name="2023" class="dropdown-item" value="2023">2023</li>
+              <li name="2022" class="dropdown-item" value="2022">2022</li>
+              <li name="2021" class="dropdown-item" value="2021">2021</li>
+
+            </ul>
+          </div><br><br>
+
         <table class="table">
-            <caption>2023</caption>
+            <caption id="cap-year">2023</caption>
             <thead>
               <tr style="background-color: #e3f2fd;">
-                <th scope="col">Date</th>
-                <th scope="col">Description</th>
-                <th scope="col">Category</th>
-                <th scope="col">Expense</th>
+                <th scope="col">Month</th>
+                <th scope="col">Expenses</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>Larry</td>
-                <td>the Bird</td>
-                <td>@twitter</td>
-              </tr>
-              <tr>
-                <th scope="row" colspan="3"></th>
-                <td style="font-weight: bold;">Total: 30000</td>
-              </tr>
+            <tbody id="tbody-yearly">
+             
             </tbody>
           </table>
       </div>
+      <script type = "text/JavaScript" src ="https://MomentJS.com/downloads/moment-with-locales.js"></script>
     <script src="./expense-report.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 </body>

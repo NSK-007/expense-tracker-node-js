@@ -25,7 +25,7 @@ exports.purchasePremium = async (req, res, next) => {
             key_secret: process.env.RAZOR_PAY_KEY_SECRET
         });
 
-        const amount = 2500;
+        const amount = 16000000;
 
         rz_pay.orders.create({amount, currency: "INR"}, async (err, order) => {
             if(err){
