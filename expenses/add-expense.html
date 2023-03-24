@@ -25,17 +25,19 @@
                 <a class="nav-link active" aria-current="page" href="expense-report.html">Expense Report</a>
               </li>
             </ul>
+
+
+            <ul class="navbar-nav justify-content-end">
+              <li class="nav-item">
+                <button class="nav-link btn" id="premium" style="color: goldenrod; font-weight: bold;" tabindex="-1">Buy Premium</button>
+              </li>
+              <li class="nav-item">
+                <a id="login_btn" class="nav-link" href="../login/login.html">Login</a>
+                <a id="logout_btn" style="display: none;" class="nav-link" href="#">Logout</a>
+              </li>
+            </ul>
           </div>
           
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <button class="nav-link btn" id="premium" style="color: goldenrod; font-weight: bold;" tabindex="-1">Buy Premium</button>
-            </li>
-            <li class="nav-item">
-              <a id="login_btn" class="nav-link" href="../login/login.html">Login</a>
-              <a id="logout_btn" style="display: none;" class="nav-link" href="#">Logout</a>
-            </li>
-          </ul>
         </div>
       </nav>
       <div class="container">
@@ -43,23 +45,36 @@
             <h4>Add Expenses</h4><br>
             <div id="error"></div>
             <form name="form-body" id="form-id" class="form-inline mb-3">
-                <input placeholder="Amount" type="text" name="amount" class="form-control mr-2" id="itemNum">
-                <input placeholder="Description" name="description" type="text" class="form-control mr-2" id="itemDesc">
-                <div class="form-group">
-                    <select name="type" class="custom-select" id="itemType">
-                        <option value="Fuel">Fuel</option>
-                        <option  value="Food">Food</option>
-                        <option  value="Electricity">Electricity</option>
-                        <option  value="Movie">Movie</option>
-                    </select>
-                </div>&nbsp;&nbsp;&nbsp;
-                <input id="submit_btn" type="submit" class="btn btn-success" value="Add Expense">
-                <input id="update_exp" type="button" name="update_btn" class="btn btn-primary" value="Update" style="display:none;">
+               <!-- <div class="row"> -->
+                  <div class="col-auto">
+                    <input placeholder="Amount" type="text" name="amount" class="form-control mr-2" id="itemNum">
+                  </div>
+                  <div class="col-auto">
+                    <input placeholder="Description" name="description" type="text" class="form-control mr-2" id="itemDesc">
+                  </div>
+                  <div class="col-auto">
+                    <div class="form-group">
+                      <select name="type" class="custom-select" id="itemType">
+                          <option value="Fuel">Fuel</option>
+                          <option  value="Food">Food</option>
+                          <option  value="Electricity">Electricity</option>
+                          <option  value="Movie">Movie</option>
+                      </select>
+                  </div>
+                  </div>
+                  <div class="col-auto">
+                    <input id="submit_btn" type="submit" class="btn btn-success" value="Add Expense">
+                    <input id="update_exp" type="button" name="update_btn" class="btn btn-primary" value="Update" style="display:none;">
+                  </div>
+               <!-- </div> -->
+                
+               <!-- &nbsp;&nbsp;&nbsp; -->
+
             </form><br>
             <h2>Expenses</h2>
             <ul id="items" class="list-group"></ul>
             <br>
-            <button id="leader-board" class="btn btn-info btn-md col-3" style="display: none;">Show Leaderboard</button>
+            <button id="leader-board" class="btn btn-info btn-md col-lg-3 col-md-3 col-auto" style="display: none;">Show Leaderboard</button>
             <div id="leader-board-section" style="display: none;">
               <hr style="border: 2px solid rgb(17, 1, 1);">
               <h3>LeaderBoard</h3>

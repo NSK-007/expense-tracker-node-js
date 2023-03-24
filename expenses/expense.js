@@ -56,18 +56,18 @@ function createNewLi(id, amount, type, desc){
     deleteBtn.appendChild(document.createTextNode('delete expense'));
 
     //edit button
-    var editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-primary btn-sm';
-    editBtn.id = 'edit'+id;
-    editBtn.appendChild(document.createTextNode('edit expense'));
+    // var editBtn = document.createElement('button');
+    // editBtn.className = 'btn btn-primary btn-sm';
+    // editBtn.id = 'edit'+id;
+    // editBtn.appendChild(document.createTextNode('edit expense'));
 
     //creating a div to enclose them;
     var div = document.createElement('div');
     div.className = 'row-2 float-right';
 
     div.appendChild(deleteBtn);
-    div.append(' '); // to space the delete and edit
-    div.appendChild(editBtn); 
+    // div.append(' '); // to space the delete and edit
+    // div.appendChild(editBtn); 
 
     li.appendChild(document.createTextNode(`${amount} - ${type} - ${desc}`));
     li.appendChild(div);

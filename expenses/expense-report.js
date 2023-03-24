@@ -1,8 +1,13 @@
 let backend_url = 'http://localhost:3000';
 let logout = document.querySelector('#logout_btn');
 let month_list = document.querySelector('#monthlist');
-let year_list = document.querySelector('#yearlist2')
+let year_list = document.querySelector('#yearlist2');
+let monthly_report = document.querySelector('#monthly');
+let yearly_report = document.querySelector('#yearly');
+const token = localStorage.getItem('token');
 
+monthly_report.addEventListener('click', download);
+yearly_report.addEventListener('click', download);
 document.addEventListener('DOMContentLoaded', checkAuthentication);
 document.addEventListener('DOMContentLoaded', checkPremium);
 document.addEventListener('DOMContentLoaded', getExpensesMonthly);
@@ -38,7 +43,6 @@ function showSuccess(err){
 
 //to initiate premium
 async function takePremium(e){
-    const token = localStorage.getItem('token');
     console.log('premium starting')
     try{
         const res = await axios.get(`${backend_url}/purchase/premium-membership`, {headers: {"Authorization": token}});
@@ -79,7 +83,6 @@ async function takePremium(e){
 
 //checking authentication
 function checkAuthentication(){
-    const token = localStorage.getItem('token');
     if(token!=null){
         let logout = document.querySelector('#logout_btn');
         let login = document.querySelector('#login_btn');
@@ -91,7 +94,6 @@ function checkAuthentication(){
 //checking if the user got premium membership
 async function checkPremium(){
     try{
-        const token = localStorage.getItem('token');
         const res = await axios.get(`${backend_url}/user/check-premium`, {headers: {"Authorization": token}});
         if(res.data.success){
             document.querySelector('#premium').innerHTML = 'Premium User';
@@ -125,7 +127,6 @@ async function getExpensesMonthly(e){
         console.log(currMonth);
     }
     var month;
-    const token = localStorage.getItem('token');
     try{
         const res = await axios.get(`${backend_url}/user/expenses/monthly-expenses/${currMonth}/${year}`, {headers: {"Authorization": token}});
         month = moment().month(res.data.month-1).format('MMMM');
@@ -164,7 +165,6 @@ async function getYearlyExpenses(e){
         currYear = e.target.attributes.value.nodeValue
         console.log(currYear);
     }
-    const token = localStorage.getItem('token');
     try{
         const res = await axios.get(`${backend_url}/user/expenses/yearly-expenses/${currYear}`, {headers: {"Authorization": token}});
         year = moment().year(currYear).format('YYYY');
@@ -196,9 +196,8 @@ function fillTables(expenses, tbody_id, span_num){
         for(let j=0;j<obj_keys.length;j++){
             let td = document.createElement('td');
             let value;
-            if(obj_keys[j]==='createdAt'){
+            if(obj_keys[j]==='createdAt')
                 value = document.createTextNode(`${moment(expenses[i][obj_keys[j]]).format('DD-MM-YYYY')}`);
-            }
             else if(obj_keys[j]==='month')
                 value = document.createTextNode(`${moment().month(expenses[i][obj_keys[j]]-1).format('MMMM')}`);
             else
@@ -226,4 +225,24 @@ function fillTables(expenses, tbody_id, span_num){
         tr.appendChild(td);
         tr.appendChild(td2);
         t_body_monthly.appendChild(tr); 
+}
+
+async function download(e){
+    try{
+        let type = e.target.id;
+        let res = await axios.get(`${backend_url}/user/expenses/download/${type}`, {headers: {"Authorization": token}});
+        if(res.status===200){
+            var a = document.createElement('a');
+            a.href = res.data.fileURL,
+            // a.download = 'myexpenses.csv';
+            a.click();
+        }
+        else{
+            throw new Error(res.data.error)
+        }
+    }
+    catch(err){
+        console.log(err);
+        showError(err);
+    }
 }
