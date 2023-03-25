@@ -4,6 +4,7 @@ let month_list = document.querySelector('#monthlist');
 let year_list = document.querySelector('#yearlist2');
 let monthly_report = document.querySelector('#monthly');
 let yearly_report = document.querySelector('#yearly');
+const history = document.querySelector('#downloads');
 const token = localStorage.getItem('token');
 
 monthly_report.addEventListener('click', downloadMonthlyExpenses);
@@ -11,6 +12,7 @@ yearly_report.addEventListener('click', downloadYearlyExpenses);
 document.addEventListener('DOMContentLoaded', checkAuthentication);
 document.addEventListener('DOMContentLoaded', checkPremium);
 document.addEventListener('DOMContentLoaded', getExpensesMonthly);
+history.addEventListener('click', showHistory);
 document.addEventListener('DOMContentLoaded', getYearlyExpenses);
 logout.addEventListener('click', logOut);
 month_list.addEventListener('click', getExpensesMonthly);
@@ -228,10 +230,10 @@ function fillTables(expenses, tbody_id, span_num){
         t_body_monthly.appendChild(tr); 
 }
 
-async function addDownloads(fileURL){
+async function addDownloads(fileURL, type){
     // console.log(fileURL);
     try{
-        let res = await axios.post(`${backend_url}/user/expenses/add-download/`, {fileURL}, {headers: {"Authorization": token}});
+        let res = await axios.post(`${backend_url}/user/expenses/add-download/`, {fileURL, type}, {headers: {"Authorization": token}});
         if(res.status!==200)
             throw new Error(res.data.error);
         console.log(res.data);
@@ -252,10 +254,10 @@ async function downloadMonthlyExpenses(e){
             a.click();
         }
         else{
-            throw new Error(res.data.error)
+            throw new Error(res.data.error);
         }
 
-        addDownloads(res.data.fileURL);
+        addDownloads(res.data.fileURL, 'Monthly');
     }
     catch(err){
         console.log(err);
@@ -277,10 +279,55 @@ async function downloadYearlyExpenses(){
         else{
             throw new Error(res.data.error)
         }
-        addDownloads(res.data.fileURL);
+        addDownloads(res.data.fileURL, 'Yearly');
     }
     catch(err){
         console.log(err);
         showError(err);
+    }
+}
+
+async function showHistory(){
+    let tbody_downloads = document.querySelector('#tbody-download');
+    tbody_downloads.innerHTML = '';
+    document.querySelector('#downloads-section').style.display = 'block';
+
+    try{
+        let res = await axios.get(`${backend_url}/user/expenses/getDownloads`, {headers: {"Authorization": token}});
+        // console.log(res.data);
+        if(res.status!==200)
+            throw new Error(res.data.error);
+        let downloads = res.data.downloads;
+        // console.log(downloads);
+        for(let i=0;i<downloads.length;i++){
+            let tr = document.createElement('tr');
+
+            
+            let td1 = document.createElement('td');
+            let a = document.createElement('a');
+            a.href = downloads[i].url;
+            a.className = 'btn btn-sm btn-info';
+            a.innerHTML = 'download'
+            td1.appendChild(a);
+
+            let td2 = document.createElement('td');
+            let value2 = document.createTextNode(`${moment(downloads[i].createdAt).format('YYYY-MM-DD')}`);
+            td2.appendChild(value2);
+
+            let td3 = document.createElement('td');
+            let value3 = document.createTextNode(`${downloads[i].type}`);
+            td3.appendChild(value3);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            // tr.appendChild(td4);
+
+            tbody_downloads.appendChild(tr);
+        }
+
+    }
+    catch(err){
+        console.log(err)
     }
 }

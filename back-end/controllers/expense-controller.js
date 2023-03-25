@@ -135,10 +135,31 @@ exports.downloadExpenses = async (req, res, next) => {
 exports.addDownload = async (req, res, next) => {
     console.log('adding download...');
     let t = await sequelize.transaction();
+    let user = req.user;
+    let obj = req.body;
     try{
-        
+        let download = await user.createDownload({url: obj.fileURL, type: obj.type}, {transaction: t});
+        // console.log(download);
+
+        res.status(200).json({success: true, download: download});
+        await t.commit();
     }
     catch(err){
-        console.log(err)
+        console.log(err);
+        res.status(201).send({success: false, error: err.message});
+        await t.rollback();
+    }
+}
+
+exports.getDownloads = async (req, res, next) => {
+    console.log('getting downloads...');
+    let user = req.user;
+    try{
+        let downloads = await user.getDownloads();
+        res.status(200).json({success: true, downloads: downloads});
+    }
+    catch(err){
+        console.log(err);
+        res.status(201).send({success: false, error: err.message});
     }
 }

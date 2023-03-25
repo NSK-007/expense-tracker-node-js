@@ -3,7 +3,7 @@ const sequelize = require("../util/database");
 
 const Download = sequelize.define('download', {
     id: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
@@ -12,5 +12,10 @@ const Download = sequelize.define('download', {
         type: Sequelize.STRING,
         allowNull: false
     },
-    
-})
+    type: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
+});
+
+module.exports = Download;

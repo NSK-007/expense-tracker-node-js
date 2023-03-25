@@ -13,6 +13,8 @@ ExpenseRouter.get('/expenses/yearly-expenses/:year', authenticate, yearly_expens
 
 ExpenseRouter.get('/expenses/downloadMonthly/:month/:year', authenticate, monthly_expenses, ExpenseController.downloadExpenses);
 
+ExpenseRouter.get('/expenses/getDownloads', authenticate, ExpenseController.getDownloads);
+
 ExpenseRouter.get('/expenses/downloadYearly/:year', authenticate, yearly_expenses, ExpenseController.downloadExpenses);
 
 ExpenseRouter.post('/add-expense', authenticate, ExpenseController.addExpense);
