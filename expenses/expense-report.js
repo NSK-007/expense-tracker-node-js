@@ -6,8 +6,8 @@ let monthly_report = document.querySelector('#monthly');
 let yearly_report = document.querySelector('#yearly');
 const token = localStorage.getItem('token');
 
-monthly_report.addEventListener('click', download);
-yearly_report.addEventListener('click', download);
+monthly_report.addEventListener('click', downloadMonthlyExpenses);
+yearly_report.addEventListener('click', downloadYearlyExpenses);
 document.addEventListener('DOMContentLoaded', checkAuthentication);
 document.addEventListener('DOMContentLoaded', checkPremium);
 document.addEventListener('DOMContentLoaded', getExpensesMonthly);
@@ -110,11 +110,11 @@ async function checkPremium(){
 }
 
 //getting monthly expenses
+var currMonth = new Date().getMonth()+1;
 async function getExpensesMonthly(e){
     let year_list = document.querySelector('#yearlist');
     let year = year_list.value;
 
-    let currMonth = new Date().getMonth()+1;
     document.querySelector('#tbody-monthly').innerHTML = ``;
     await new Promise((res, rej) => {
         setTimeout(() => {
@@ -129,7 +129,7 @@ async function getExpensesMonthly(e){
     var month;
     try{
         const res = await axios.get(`${backend_url}/user/expenses/monthly-expenses/${currMonth}/${year}`, {headers: {"Authorization": token}});
-        month = moment().month(res.data.month-1).format('MMMM');
+        month = moment().month(currMonth-1).format('MMMM');
         if(res.status!==200)
             throw new Error(res.data.error);
         if(res.data.expenses.length==0)
@@ -141,7 +141,7 @@ async function getExpensesMonthly(e){
         showError(err.message)
     }
     finally{
-        document.querySelector('#cap_month').innerHTML =month;
+        document.querySelector('#cap_month').innerHTML = month;
     }
 }
 
@@ -151,8 +151,9 @@ function logOut(){
 }
 
 //getting yearly expenses
+var currYear;
 async function getYearlyExpenses(e){
-    let currYear = moment().year();
+    currYear = moment().year();
     console.log(currYear)
     document.querySelector('#tbody-yearly').innerHTML = ``;
     await new Promise((res, rej) => {
@@ -227,10 +228,46 @@ function fillTables(expenses, tbody_id, span_num){
         t_body_monthly.appendChild(tr); 
 }
 
-async function download(e){
+async function addDownloads(fileURL){
+    // console.log(fileURL);
     try{
-        let type = e.target.id;
-        let res = await axios.get(`${backend_url}/user/expenses/download/${type}`, {headers: {"Authorization": token}});
+        let res = await axios.post(`${backend_url}/user/expenses/add-download/`, {fileURL}, {headers: {"Authorization": token}});
+        if(res.status!==200)
+            throw new Error(res.data.error);
+        console.log(res.data);
+    }
+    catch(err){
+        console.log(err);
+        showError(err);
+    }
+}
+
+async function downloadMonthlyExpenses(e){
+    try{
+        let year = document.querySelector('#yearlist').value;
+        let res = await axios.get(`${backend_url}/user/expenses/downloadMonthly/${currMonth}/${year}`, {headers: {"Authorization": token}});
+        if(res.status===200){
+            var a = document.createElement('a');
+            a.href = res.data.fileURL,
+            a.click();
+        }
+        else{
+            throw new Error(res.data.error)
+        }
+
+        addDownloads(res.data.fileURL);
+    }
+    catch(err){
+        console.log(err);
+        showError(err);
+    }
+}
+
+async function downloadYearlyExpenses(){
+    try{
+        let year = currYear;
+        console.log(year)
+        let res = await axios.get(`${backend_url}/user/expenses/downloadYearly/${year}`, {headers: {"Authorization": token}});
         if(res.status===200){
             var a = document.createElement('a');
             a.href = res.data.fileURL,
@@ -240,6 +277,7 @@ async function download(e){
         else{
             throw new Error(res.data.error)
         }
+        addDownloads(res.data.fileURL);
     }
     catch(err){
         console.log(err);

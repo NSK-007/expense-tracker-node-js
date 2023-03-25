@@ -3,6 +3,9 @@ const Expense = require("../models/expense-model");
 const User = require("../models/user-model");
 const AWS = require('aws-sdk')
 const sequelize = require("../util/database");
+const monthly_expenses = require("../middleware/monthly-expenses");
+const converter = require('json-2-csv');
+const yearly_expenses = require("../middleware/yearly-expenses");
 
 exports.getUserExpenses = async (req, res, next) => {
     try{
@@ -58,23 +61,7 @@ exports.deleteExpense = async (req, res, next) => {
 exports.getMonthlyExpenses = async (req, res, next) => {
     try{
         console.log('Monthly Expenses');
-        let obj = req.params
-        // console.log(obj);
-        let expenses = await Expense.findAll({
-            attributes: [
-                'createdAt', 'description', 'type', 'amount' 
-                // [sequelize.fn('sum', sequelize.col('amount')), 'total_sum']x
-            ],
-            where: {
-                userId: req.user.id,
-                [Op.and]: [
-                    sequelize.where(sequelize.fn('Month', sequelize.col('createdAt')), obj.month),
-                    sequelize.where(sequelize.fn('YEAR', sequelize.col('createdAt')), obj.year)
-                ],
-            },
-        })
-        // console.log(expenses);
-        res.status(200).json({success: true, expenses: expenses, month: obj.month});
+        res.status(200).json({success: true, expenses: req.expenses});
     }
     catch(err){
         console.log(err);
@@ -84,22 +71,7 @@ exports.getMonthlyExpenses = async (req, res, next) => {
 
 exports.getYearlyExpenses = async (req, res, next) => {
     try{
-        let year = req.params.year;
-        let expenses_by_month = await Expense.findAll({
-            attributes: [
-                [sequelize.fn('MONTH', sequelize.col('createdAt')), 'month'],
-                [sequelize.fn('SUM', sequelize.col('amount')), 'total_expense']
-            ],
-            where:{
-                userId: req.user.id,
-                [Op.and] : [
-                    sequelize.where(sequelize.fn('YEAR', sequelize.col('createdAt')), year)
-                ]
-            },
-            group: [sequelize.fn('MONTH', sequelize.col('createdAt'))],
-            order: [['month', 'ASC']]
-        });
-        res.status(200).json({expenses: expenses_by_month});
+        res.status(200).json({expenses: req.expenses});
     }
     catch(err){
         console.log(err);
@@ -142,17 +114,31 @@ async function uploadToS3(filename, expenses){
 
 exports.downloadExpenses = async (req, res, next) => {
     console.log('downloading....');
-    let type = req.params.type;
     try{
-        const expenses = await req.user.getExpenses();
-        const stringifiedExpenses = JSON.stringify(expenses);
-        const filename = `${req.user.id}_Expenses/${type}/${new Date()}.txt`;
-        const fileURL = await uploadToS3(filename, stringifiedExpenses);
+        // let expenses = await monthly_expenses(obj, req.user.id);
+        let type = (req.url).includes('Monthly')?'Monthly':'Yearly';
+        // console.log(req.url)
+        let expenses = req.expenses;
+        expenses = expenses.map(expenses => expenses.dataValues);
+        let csvData = await converter.json2csv(expenses);
+        const filename = `${req.user.id}_Expenses/${type}/${new Date()}.csv`;
+        const fileURL = await uploadToS3(filename, csvData);
         console.log(fileURL);
         res.status(200).json({success: true, fileURL});
     }
     catch(err){
         console.log(err);
-        res.status(201).send({success: false, error: err.message})
+        res.status(201).send({success: false, error: err.message});
+    }
+}
+
+exports.addDownload = async (req, res, next) => {
+    console.log('adding download...');
+    let t = await sequelize.transaction();
+    try{
+        
+    }
+    catch(err){
+        console.log(err)
     }
 }
