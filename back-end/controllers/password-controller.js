@@ -7,20 +7,18 @@ const User = require('../models/user-model');
 const sequelize = require('../util/database');
 const bcrypt = require('bcrypt');
 const ForgotPassword = require('../models/forgotpassword-model');
+const TransactionServices = require('../services/transaction-services');
+const UserServices = require('../services/user-services');
+const PasswordService = require('../services/password-services');
 exports.sendMail = async (req, res, next) => {
-    let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     try{
         const gmail = req.body.resetEmail;
-        const user = await User.findOne({where: {email: gmail}});
-
+        const user = await UserServices.findUserByEmail(gmail, t);
         if(user===null)
             throw new Error('Mail not matched with the registered email');
+        let record = await PasswordService.createForgotpasswordRecord(user, t);
 
-        let record = await user.createForgotpassword({
-            id: uuidv4(),
-            isActive: true,
-        },{transaction: t});
-        // console.log(record);
         const uuid = record.dataValues.id;
         console.log(uuid);
 
@@ -66,10 +64,8 @@ exports.sendMail = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
     try{
-      // console.log(req.params.uuid)
-      // console.log(rootDir)
       const uuid = req.params.uuid;
-      const fp = await ForgotPassword.findOne({where: {id: uuid}});
+      const fp = await PasswordService.findForgotPasswordByUUID(uuid);
 
       if(fp===null)
         throw new Error('Password Link doesn\'t exists ');
@@ -90,11 +86,13 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.updatePassword = async (req, res, next) => {
   console.log('updating password....')
-  const t = await sequelize.transaction();
+  const t = await TransactionServices.transaction();
   try{
     let updatePasswordObj = req.body;
-    // console.log(req.body)
-    let user = await User.findOne({where: {email: updatePasswordObj.email}});
+    let reset_password_email = await PasswordService.findForgotPasswordRecord(req.params.uuid, updatePasswordObj);
+    if(reset_password_email===null)
+      throw new Error('Email doesn\'t match with the email used in generating this link');
+    let user = await UserServices.findUserByEmail(updatePasswordObj.email, t);
     if(user===null)
         throw new Error('User doesn\'t exist with given email');
 
@@ -102,8 +100,8 @@ exports.updatePassword = async (req, res, next) => {
     bcrypt.hash(updatePasswordObj.pass1, saltRounds, async (err, hash) => {
       if(err)
         console.log(err)
-      await User.update({password: hash}, {where: {id: user.id}, transaction: t});
-      await ForgotPassword.update({isActive: false}, {where: {id: updatePasswordObj.uuid}});
+      await UserServices.updateUser(hash, user, t);
+      await PasswordService.updateForgotPasswordRecord(updatePasswordObj, t);
       await t.commit();
       res.status(200).json({success: true, message: 'Password updated successfully'});
     });    

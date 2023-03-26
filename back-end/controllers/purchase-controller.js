@@ -1,7 +1,10 @@
-const RazorPay = require('razorpay');
 const Order = require('../models/order-model');
 const sequelize = require('../util/database');
 require('dotenv').config();
+const TransactionServices = require('../services/transaction-services');
+const RazorpayServices = require('../services/razorpay-services');
+const OrderServices = require('../services/order-services');
+const UserServices = require('../services/user-services');
 
 exports.checkIfAlreadyPremium = async (req, res, next) => {
     try{
@@ -11,21 +14,15 @@ exports.checkIfAlreadyPremium = async (req, res, next) => {
         next();
     }
     catch(err){
-        // console.log(err);
         res.status(201).send({success: false, error: err.message});
     }
 }
 
 exports.purchasePremium = async (req, res, next) => {
-    let t = await sequelize.transaction();
-    try{    
-        // console.log(process.env.RAZOR_PAY_KEY_ID);
-        var rz_pay = new RazorPay({
-            key_id: process.env.RAZOR_PAY_KEY_ID,
-            key_secret: process.env.RAZOR_PAY_KEY_SECRET
-        });
-
-        const amount = 16000000;
+    let t = await TransactionServices.transaction();
+    try{ 
+        rz_pay = RazorpayServices.connectToRazorPay();
+        const amount = 2500;
 
         rz_pay.orders.create({amount, currency: "INR"}, async (err, order) => {
             if(err){
@@ -45,16 +42,18 @@ exports.purchasePremium = async (req, res, next) => {
 }
 
 exports.updateTransactionStatus = async (req, res, next) => {
-    let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     try{
         const currentUser = req.user;
         const {payment_id, order_id} = req.body;
-        let order = await Order.findOne({where: {orderid: order_id}, transaction: t});
+        let order = await OrderServices.findOrder(order_id, t);
         if(!payment_id){
-            order.update({paymentId: payment_id, status: 'FAILED'}, {transaction: t});
+            await OrderServices.updateOrder(order, payment_id, 'FAILED');
             throw new Error('Payment Failed');
         }
-        await Promise.all([order.update({paymentId: payment_id, status: 'SUCCESSFUL'}, {transaction: t}), currentUser.update({isPremiumUser: true}, {transaction: t})]);
+
+        await Promise.all([OrderServices.updateOrder(order, payment_id, 'SUCCESSFUL', t), UserServices.updateUserPremiumStatus(t)]);
+
         await t.commit();
         res.status(200).json({success: true, message: 'Transaction Successful'});
     }

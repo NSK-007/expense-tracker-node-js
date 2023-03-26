@@ -4,19 +4,21 @@ const jwt = require('jsonwebtoken');
 const sequelize = require("../util/database");
 // const SIB = require('sib-api-v3-sdk');
 require('dotenv').config();
+const TransactionServices = require('../services/transaction-services');
+const UserServices = require('../services/user-services');
 
 exports.signUpUser = async (req, res, next) => {
-    let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     try{
         const {name, email, password} = req.body;
-        let user = await User.findAll({where:{email: email}, transaction: t})
+        let user = await UserServices.findUserByEmail(email, t);
         if(user.length>0)
             throw new Error('User already exists');
 
         const saltrounds = 10;
         bcrypt.hash(password, saltrounds, async (err, hash) => {
             console.log(err);
-            await User.create({name, email, password: hash, isPremiumUser: false, totalExpense: 0}, {transaction: t});
+            await UserServices.createNewUser(name, email, hash, t);
             await t.commit();
             res.status(200).json({success:true, message:'User successfully registered'}); 
         })
@@ -33,15 +35,16 @@ function generateToken(user){
 }
 
 exports.loginUser = async (req, res, next) => {
-    // let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     try{
         const {email, password} = req.body;
-        let user = await User.findAll({where:{email:email}});
+        let user = await UserServices.findUserByEmail(email, t);
         if(user.length>0){
            let flag = await bcrypt.compare(password, user[0].password);
            if(!flag)
                 throw new Error('Incorrect Password');
             const token = generateToken(user[0]);
+            t.commit();
             res.status(200).json({success:true, message:'Login Successful', token: token});
         }
         else
@@ -49,6 +52,7 @@ exports.loginUser = async (req, res, next) => {
     }
     catch(err){
         console.log(err)
+        await t.rollback();
         res.status(201).send({success:false, error:err.message});
     }
 }
@@ -56,14 +60,12 @@ exports.loginUser = async (req, res, next) => {
 exports.checkPremium = async (req, res, next) => {
     try{
         currentUser = req.user;
-        // console.log(currentUser);
         if(currentUser.isPremiumUser)
             res.status(200).json({success: true, message: 'You are a premium user'});
         else
             throw new Error('You are not a premium user');
     }
     catch(err){
-        // console.log(err);
         res.status(201).send({success: false, error: err.message});
     }
 }

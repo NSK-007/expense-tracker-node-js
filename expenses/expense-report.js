@@ -230,10 +230,16 @@ function fillTables(expenses, tbody_id, span_num){
         t_body_monthly.appendChild(tr); 
 }
 
-async function addDownloads(fileURL, type){
-    // console.log(fileURL);
+async function addDownloads(fileURL, timeline, type){
+    console.log(fileURL);
     try{
-        let res = await axios.post(`${backend_url}/user/expenses/add-download/`, {fileURL, type}, {headers: {"Authorization": token}});
+        let res = await axios.post(`${backend_url}/user/expenses/add-download/`, {fileURL, type, timeline}, {headers: {"Authorization": token}});
+        if(res.status===200){
+            var a = document.createElement('a');
+            console.log('Executing', fileURL);
+            a.href = fileURL;
+            a.click();
+        }
         if(res.status!==200)
             throw new Error(res.data.error);
         console.log(res.data);
@@ -249,15 +255,12 @@ async function downloadMonthlyExpenses(e){
         let year = document.querySelector('#yearlist').value;
         let res = await axios.get(`${backend_url}/user/expenses/downloadMonthly/${currMonth}/${year}`, {headers: {"Authorization": token}});
         if(res.status===200){
-            var a = document.createElement('a');
-            a.href = res.data.fileURL,
-            a.click();
         }
         else{
             throw new Error(res.data.error);
         }
 
-        addDownloads(res.data.fileURL, 'Monthly');
+        addDownloads(res.data.fileURL, res.data.timeline, 'Monthly');
     }
     catch(err){
         console.log(err);
@@ -279,7 +282,7 @@ async function downloadYearlyExpenses(){
         else{
             throw new Error(res.data.error)
         }
-        addDownloads(res.data.fileURL, 'Yearly');
+        addDownloads(res.data.fileURL, res.data.timeline, 'Yearly');
     }
     catch(err){
         console.log(err);
@@ -306,6 +309,7 @@ async function showHistory(){
             let td1 = document.createElement('td');
             let a = document.createElement('a');
             a.href = downloads[i].url;
+            console.log(downloads[i].url);
             a.className = 'btn btn-sm btn-info';
             a.innerHTML = 'download'
             td1.appendChild(a);
@@ -318,10 +322,15 @@ async function showHistory(){
             let value3 = document.createTextNode(`${downloads[i].type}`);
             td3.appendChild(value3);
 
+            let td4 = document.createElement('td');
+            let timeline = downloads[i].type==='Monthly'? moment().month(downloads[i].timeline.split('-')[0]-1).format('MMMM')+'-'+downloads[i].timeline.split('-')[1]:downloads[i].timeline;
+            let value4 = document.createTextNode(`${timeline}`);
+            td4.appendChild(value4);
+
             tr.appendChild(td1);
             tr.appendChild(td2);
             tr.appendChild(td3);
-            // tr.appendChild(td4);
+            tr.appendChild(td4);
 
             tbody_downloads.appendChild(tr);
         }

@@ -1,8 +1,5 @@
-const { Sequelize } = require("sequelize");
-const Expense = require("../models/expense-model");
 const User = require("../models/user-model");
-const sequelize = require("../util/database")
-
+const UserServices = require('../services/user-services')
 exports.getLeaderBoard = async (req, res, next) => {
     try{
         // const expense_user = await sequelize.query('SELECT users.name, SUM(amount) FROM users INNER JOIN expenses WHERE users.id = expenses.userId GROUP BY userId ORDER BY SUM(amount) DESC',  {type: Sequelize.QueryTypes.SELECT});
@@ -20,11 +17,12 @@ exports.getLeaderBoard = async (req, res, next) => {
         // })
         // res.status(200).json({expense_user});
 
-        const expense_user = await User.findAll({
-            attributes: ['name', 'totalExpense'],
-            order: [['totalExpense', 'DESC'] ]
-        })
-        res.status(200).json({expense_user});
+        // const expense_user = await User.findAll({
+        //     attributes: ['name', 'totalExpense'],
+        //     order: [['totalExpense', 'DESC'] ]
+        // })
+        const expense_users = await UserServices.findAllUsers();
+        res.status(200).json({expense_users});
     }
     catch(err){
         console.log(err);

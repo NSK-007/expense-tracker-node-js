@@ -12,7 +12,7 @@ UserRouter.get('/password/resetpassword/:uuid', PasswordController.resetPassword
 
 UserRouter.post('/password/forgot-password', PasswordController.sendMail);
 
-UserRouter.post('/password/update-password', PasswordController.updatePassword);
+UserRouter.post('/password/update-password/:uuid', PasswordController.updatePassword);
 
 UserRouter.get('/check-premium', authenticate, UserController.checkPremium);
 

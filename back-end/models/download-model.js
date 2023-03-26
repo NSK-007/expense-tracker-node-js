@@ -15,6 +15,10 @@ const Download = sequelize.define('download', {
     type: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+    timeline: {
+        type: Sequelize.STRING,
+        allowNull: false
     }
 });
 

@@ -6,11 +6,15 @@ const sequelize = require("../util/database");
 const monthly_expenses = require("../middleware/monthly-expenses");
 const converter = require('json-2-csv');
 const yearly_expenses = require("../middleware/yearly-expenses");
+const ExpenseServices = require('../services/expense-services');
+const TransactionServices = require('../services/transaction-services');
+const S3Services = require('../services/s3-services');
 
 exports.getUserExpenses = async (req, res, next) => {
     try{
         const currentUser = req.user;
-        const expenses = await currentUser.getExpenses();
+        // const expenses = await currentUser.getExpenses();
+        const expenses = await ExpenseServices.getExpenses(req, currentUser);
         res.status(200).json(expenses);
     }
     catch(err){
@@ -20,12 +24,11 @@ exports.getUserExpenses = async (req, res, next) => {
 }
 
 exports.addExpense = async (req, res, next) => {
-    let t = await sequelize.transaction();
+    // let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     try{
         const {amount, description, type} = req.body;
         const currentUser = req.user;
-        // console.log(Number(currentUser.totalExpense+Number(amount)));
-        // console.log(typeof amount, typeof req.user.totalExpense);
         let expense = await currentUser.createExpense({amount, description, type}, {transaction: t});
         await User.update({totalExpense: (currentUser.totalExpense+Number(amount))}, {where: {id: currentUser.id}, transaction: t} );
         await t.commit();
@@ -39,15 +42,14 @@ exports.addExpense = async (req, res, next) => {
 }
 
 exports.deleteExpense = async (req, res, next) => {
-    let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     try{
         const id = req.params.id;
-        // let expense = await Expense.findByPk(id);
         let currentUser = req.user;
-        let expense = await Expense.findAll({where : {id: id, userId: currentUser.id}, transaction: t})
-        // console.log(id, expense);
-        await expense[0].destroy({transaction: t});
-        await currentUser.update({totalExpense: currentUser.totalExpense - Number(expense[0].amount)}, {where: {id: currentUser.id}, transaction: t})
+        let expense = await ExpenseServices.getExpenseById(id, currentUser, t);
+        console.log(expense);
+        await ExpenseServices.destroyExpense(expense, t);
+        await ExpenseServices.updateExpense(expense, currentUser, t);
         await t.commit();
         res.status(200).send({success:true, message:'Expense Deleted'});
     }
@@ -79,52 +81,21 @@ exports.getYearlyExpenses = async (req, res, next) => {
     }
 }
 
-async function uploadToS3(filename, expenses){
-    console.log('json',expenses);
-    const BUCKET_NAME = process.env.BUCKET_NAME
-    const IAM_USER_KEY = process.env.IAM_USER_KEY
-    const IAM_USER_SECRET = process.env.IAM_USER_SECRET
-
-    let s3bucket = new AWS.S3({
-        accessKeyId: IAM_USER_KEY,
-        secretAccessKey: IAM_USER_SECRET,
-    });
-    var params = {
-        Bucket: BUCKET_NAME,
-        Key: filename,
-        Body: expenses,
-        ACL: 'public-read'
-    }
-
-    const s3_promise = new Promise((res, rej) => {
-        s3bucket.upload(params, (err, s3_res) => {
-            if(err){
-                console.log(err);
-                rej(new Error(err.message));
-            }
-            else{
-                console.log(s3_res);
-                res(s3_res.Location);
-            }
-        });
-    });
-
-    return await s3_promise;
-}
-
 exports.downloadExpenses = async (req, res, next) => {
     console.log('downloading....');
     try{
         // let expenses = await monthly_expenses(obj, req.user.id);
         let type = (req.url).includes('Monthly')?'Monthly':'Yearly';
         // console.log(req.url)
+        let obj = req.params;
         let expenses = req.expenses;
         expenses = expenses.map(expenses => expenses.dataValues);
         let csvData = await converter.json2csv(expenses);
-        const filename = `${req.user.id}_Expenses/${type}/${new Date()}.csv`;
-        const fileURL = await uploadToS3(filename, csvData);
+        let timeline = type==='Monthly'?obj.month+'-'+obj.year:obj.year;
+        const filename = `${req.user.id}_Expenses/${type}/${timeline+'-'+new Date()}.csv`;
+        const fileURL = await S3Services.uploadToS3(filename, csvData);
         console.log(fileURL);
-        res.status(200).json({success: true, fileURL});
+        res.status(200).json({success: true, fileURL, timeline});
     }
     catch(err){
         console.log(err);
@@ -134,13 +105,11 @@ exports.downloadExpenses = async (req, res, next) => {
 
 exports.addDownload = async (req, res, next) => {
     console.log('adding download...');
-    let t = await sequelize.transaction();
+    let t = await TransactionServices.transaction();
     let user = req.user;
     let obj = req.body;
     try{
-        let download = await user.createDownload({url: obj.fileURL, type: obj.type}, {transaction: t});
-        // console.log(download);
-
+        let download = await ExpenseServices.createDownloads(user, obj, t);
         res.status(200).json({success: true, download: download});
         await t.commit();
     }
@@ -155,7 +124,7 @@ exports.getDownloads = async (req, res, next) => {
     console.log('getting downloads...');
     let user = req.user;
     try{
-        let downloads = await user.getDownloads();
+        let downloads = await ExpenseServices.getUserDownloads(user);
         res.status(200).json({success: true, downloads: downloads});
     }
     catch(err){

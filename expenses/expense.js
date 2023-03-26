@@ -229,7 +229,7 @@ async function showLeaderBoard(){
         const token = localStorage.getItem('token');
         let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard`, {headers: {"Authorization": token}});
         // console.log(leaderboard_details.data.expense_user);
-        let users = leaderboard_details.data.expense_user;
+        let users = leaderboard_details.data.expense_users;
         for(let i=0;i<users.length;i++){
             createNewTableRows(users[i])
         }
