@@ -21,8 +21,12 @@ exports.getLeaderBoard = async (req, res, next) => {
         //     attributes: ['name', 'totalExpense'],
         //     order: [['totalExpense', 'DESC'] ]
         // })
-        const expense_users = await UserServices.findAllUsers();
-        res.status(200).json({expense_users});
+        const page = req.query.page;
+        console.log('page',page)
+        const expense_users = await UserServices.findAllUsers(page);
+        const total_rows = await UserServices.getUsersTotalCount();
+        const pages = Math.ceil(total_rows[0].dataValues.total_count/5);
+        res.status(200).json({expense_users, pages});
     }
     catch(err){
         console.log(err);

@@ -1,5 +1,15 @@
-const getExpenses = (req, user) => {
-    return user.getExpenses();
+const sequelize = require("../util/database");
+
+const getExpenses = (user, page) => {
+    return user.getExpenses({offset:(Number(page-1))*5, limit:5});
+}
+
+const getExpensesTotalCount = (user) => {
+    return user.getExpenses({
+        attributes: [
+            [sequelize.fn('COUNT', sequelize.col('id')), 'total_count']
+        ]
+    });
 }
 
 const getExpenseById = (id, user, t) => {
@@ -12,7 +22,8 @@ const destroyExpense = (expense, t) => {
 
 const updateExpense = (expense, user, t) => {
     return user.update({totalExpense: currentUser.totalExpense - Number(expense[0].amount)}, {where: {id: currentUser.id}, transaction: t})
-}
+} 
+
 
 const createDownloads = (user, obj, t) => {
     return user.createDownload({url: obj.fileURL, type: obj.type, timeline: obj.timeline}, {transaction: t});
@@ -28,5 +39,6 @@ module.exports = {
     destroyExpense,
     updateExpense,
     createDownloads,
-    getUserDownloads
+    getUserDownloads,
+    getExpensesTotalCount
 }

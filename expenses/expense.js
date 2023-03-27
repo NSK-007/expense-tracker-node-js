@@ -4,6 +4,16 @@ let itemList = document.querySelector('#items');
 let logout = document.querySelector('#logout_btn');
 let leaderboard = document.querySelector('#leader-board');
 
+let pg_btn1 = document.querySelector('#pg_btn_1');
+let pg_btn2 = document.querySelector('#pg_btn_2');
+let pg_btn_next = document.querySelector('#pg_btn_next');
+let pg_btn_last = document.querySelector('#pg_btn_last');
+
+let l_pg_btn1 = document.querySelector('#l_pg_btn_1');
+let l_pg_btn2 = document.querySelector('#l_pg_btn_2');
+let l_pg_btn_next = document.querySelector('#l_pg_btn_next');
+let l_pg_btn_last = document.querySelector('#l_pg_btn_last');
+
 document.addEventListener('DOMContentLoaded', checkAuthentication);
 document.addEventListener('DOMContentLoaded', checkPremium);
 document.addEventListener('DOMContentLoaded', getExpenses);
@@ -11,6 +21,16 @@ document.addEventListener('DOMContentLoaded', getExpenses);
 itemList.addEventListener('click', deleteExpense);
 logout.addEventListener('click', logOut);
 leaderboard.addEventListener('click', showLeaderBoard);
+
+pg_btn1.addEventListener('click', getExpenses);
+pg_btn2.addEventListener('click', getExpenses);
+pg_btn_next.addEventListener('click', getExpenses);
+pg_btn_last.addEventListener('click', getExpenses);
+
+l_pg_btn1.addEventListener('click', showLeaderBoard);
+l_pg_btn2.addEventListener('click', showLeaderBoard);
+l_pg_btn_next.addEventListener('click', showLeaderBoard);
+l_pg_btn_last.addEventListener('click', showLeaderBoard);
 
 let premium_btn = document.querySelector('#premium');
 premium_btn.addEventListener('click', takePremium);
@@ -106,14 +126,76 @@ async function addExpense(e){
      }
 }
 
-async function getExpenses(){
+let prevPage = 0;
+let currPage = 1;
+let nextPage = 2;
+let pages=0;
+async function wait(id){
+    document.querySelector(id).innerHTML = '';
+    await new Promise((res, rej) => {
+        setTimeout(() => {
+            res('timer');
+        }, 800);
+    });
+}
+
+async function getExpenses(e){
     try{
+        await wait('#items');
         const token = localStorage.getItem('token');
-        let items = await axios.get(`${backend_url}/user/get-expenses`, {headers: {"Authorization": token}});
+        let pg_btn_value = currPage
+        if(e.type!=='DOMContentLoaded'){
+            if(e.target.innerHTML==='next'){
+                prevPage = currPage;
+                currPage = currPage+1;
+                nextPage = currPage+1;
+                pg_btn_value = currPage;
+                console.log(prevPage, currPage, nextPage);
+            }
+            else if(e.target.id === 'pg_btn_last'){
+                pg_btn_value = pages;
+            }
+            else{
+                pg_btn_value = e.target.innerHTML;
+                currPage = Number(pg_btn_value);
+                prevPage = currPage-1;
+                nextPage = currPage+1;
+                console.log(prevPage, currPage, nextPage);
+            }
+           
+        }
+        let items = await axios.get(`${backend_url}/user/get-expenses?page=${pg_btn_value}`, {headers: {"Authorization": token}});
         if(items.status !== 200)
             throw new Error(items.data.error);
-        for(let i=0;i<items.data.length;i++){
-            let li = createNewLi(items.data[i].id, items.data[i].amount, items.data[i].type, items.data[i].description);
+        // console.log(items);
+        pages = items.data.pages;
+        let pg_btn_last = document.querySelector('#pg_btn_last');
+        if(pages<=2 || currPage>pages){
+            pg_btn_next.disabled = true;
+            pg_btn_last.disabled = true;
+        }
+        else{
+            pg_btn_next.disabled = false;
+            pg_btn_last.disabled = false;
+        }
+
+        pg_btn_last.innerHTML = 'Last Page - '+pages;
+        let pg_btn1 = document.querySelector('#pg_btn_1');
+        let pg_btn2 = document.querySelector('#pg_btn_2');
+
+        if(pg_btn_value>2 && e.target.id!=='pg_btn_last'){
+          pg_btn1.innerHTML = prevPage;
+          pg_btn2.innerHTML = currPage;
+        }
+
+        if(e.target.id==='pg_btn_1')
+            if(Number(pg_btn_value)>1){
+                pg_btn1.innerHTML = prevPage;
+                pg_btn2.innerHTML = currPage;
+            }
+
+        for(let i=0;i<items.data.expenses.length;i++){
+            let li = createNewLi(items.data.expenses[i].id, items.data.expenses[i].amount, items.data.expenses[i].type, items.data.expenses[i].description);
             itemList.appendChild(li);
         }
     }
@@ -220,16 +302,72 @@ function createNewTableRows(user){
     table_body.appendChild(tr);
 }
 
-async function showLeaderBoard(){
+let l_prevPage = 0;
+let l_currPage = 1;
+let l_nextPage = 2;
+let l_pages = 0;
+async function showLeaderBoard(e){
     try{
-        console.log('leaderboard')
+        await wait('#table-body');
+        console.log('leaderboard');
         let lb_section = document.querySelector('#leader-board-section');
         let t_body = document.querySelector('#table-body');
         t_body.innerHTML = '';
         const token = localStorage.getItem('token');
-        let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard`, {headers: {"Authorization": token}});
-        // console.log(leaderboard_details.data.expense_user);
+
+        let l_pg_btn_value = l_currPage;
+        if(e.target.id !== 'leader-board'){
+            if(e.target.innerHTML === 'next'){
+                l_prevPage = l_currPage;
+                l_currPage = l_currPage+1;
+                l_nextPage = l_currPage+1;
+                l_pg_btn_value = l_currPage;
+                console.log(l_prevPage, l_currPage, l_nextPage)
+            }
+            else if(e.target.id === 'l_pg_btn_last'){
+                l_pg_btn_value = l_pages;
+            }
+            else{
+                l_pg_btn_value = e.target.innerHTML;
+                l_currPage = Number(l_pg_btn_value);
+                l_prevPage = l_currPage-1;
+                l_nextPage = l_currPage+1;
+                console.log(l_prevPage, l_currPage, l_nextPage);
+            }
+        }
+        console.log(l_pg_btn_value);
+        let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard?page=${l_pg_btn_value}`, {headers: {"Authorization": token}});
+        console.log(leaderboard_details.data);
         let users = leaderboard_details.data.expense_users;
+
+        l_pages = leaderboard_details.data.pages;
+        let l_pg_btn_last = document.querySelector('#l_pg_btn_last');
+        
+        if(l_pages<=2 || l_currPage>l_pages){
+            l_pg_btn_next.disabled = true;
+            l_pg_btn_last.disabled = true;
+        }
+        else{
+            l_pg_btn_next.disabled = false;
+            l_pg_btn_last.disabled = false;
+        }
+
+        l_pg_btn_last.innerHTML = 'Last Page - '+l_pages;
+        let l_pg_btn1 = document.querySelector('#l_pg_btn_1');
+        let l_pg_btn2 = document.querySelector('#l_pg_btn_2');
+
+        if(l_pg_btn_value>2 && e.target.id!=='l_pg_btn_last'){
+          l_pg_btn1.innerHTML = l_prevPage;
+          l_pg_btn2.innerHTML = l_currPage;
+        }
+
+        if(e.target.id==='l_pg_btn_1')
+        if(Number(l_pg_btn_value)>1){
+            l_pg_btn1.innerHTML = l_prevPage;
+            l_pg_btn2.innerHTML = l_currPage;
+        }
+    
+
         for(let i=0;i<users.length;i++){
             createNewTableRows(users[i])
         }

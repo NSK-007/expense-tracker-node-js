@@ -12,10 +12,16 @@ const S3Services = require('../services/s3-services');
 
 exports.getUserExpenses = async (req, res, next) => {
     try{
+        const page = req.query.page
         const currentUser = req.user;
+        // console.log(page);
         // const expenses = await currentUser.getExpenses();
-        const expenses = await ExpenseServices.getExpenses(req, currentUser);
-        res.status(200).json(expenses);
+        const expenses = await ExpenseServices.getExpenses(currentUser, page);
+        const total_no_of_rows = await ExpenseServices.getExpensesTotalCount(currentUser);
+        // console.log(total_no_of_rows[0].dataValues.total_count);
+        let pages = Math.ceil(total_no_of_rows[0].dataValues.total_count/5);
+        // console.log(pages)
+        res.status(200).json({expenses, pages});
     }
     catch(err){
         console.log(err);
