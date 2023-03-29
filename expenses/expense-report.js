@@ -7,6 +7,41 @@ let yearly_report = document.querySelector('#yearly');
 const history = document.querySelector('#downloads');
 const token = localStorage.getItem('token');
 
+//month page buttons
+let m_pg_btn_1 = document.querySelector('#m_pg_btn_1');
+let m_pg_btn_2 = document.querySelector('#m_pg_btn_2');
+let m_pg_btn_next = document.querySelector('#m_pg_btn_next');
+let m_pg_btn_last = document.querySelector('#m_pg_btn_last');
+
+m_pg_btn_1.addEventListener('click', getExpensesMonthly);
+m_pg_btn_2.addEventListener('click', getExpensesMonthly);
+m_pg_btn_next.addEventListener('click', getExpensesMonthly);
+m_pg_btn_last.addEventListener('click', getExpensesMonthly);
+
+//year page buttons
+let y_pg_btn_1 = document.querySelector('#y_pg_btn_1');
+let y_pg_btn_2 = document.querySelector('#y_pg_btn_2');
+let y_pg_btn_next = document.querySelector('#y_pg_btn_next');
+let y_pg_btn_last = document.querySelector('#y_pg_btn_last');
+
+y_pg_btn_1.addEventListener('click', getYearlyExpenses);
+y_pg_btn_2.addEventListener('click', getYearlyExpenses);
+y_pg_btn_next.addEventListener('click', getYearlyExpenses);
+y_pg_btn_last.addEventListener('click', getYearlyExpenses);
+
+//history page buttons
+let h_pg_btn_1 = document.querySelector('#h_pg_btn_1');
+let h_pg_btn_2 = document.querySelector('#h_pg_btn_2');
+let h_pg_btn_next = document.querySelector('#h_pg_btn_next');
+let h_pg_btn_last = document.querySelector('#h_pg_btn_last');
+
+h_pg_btn_1.addEventListener('click', showHistory);
+h_pg_btn_2.addEventListener('click', showHistory);
+h_pg_btn_next.addEventListener('click', showHistory);
+h_pg_btn_last.addEventListener('click', showHistory);
+
+// -------------------------------------------------------
+
 monthly_report.addEventListener('click', downloadMonthlyExpenses);
 yearly_report.addEventListener('click', downloadYearlyExpenses);
 document.addEventListener('DOMContentLoaded', checkAuthentication);
@@ -113,38 +148,112 @@ async function checkPremium(){
 
 //getting monthly expenses
 var currMonth = new Date().getMonth()+1;
+let m_prev_page = 0;
+let m_curr_page = 1;
+let m_next_page = 2;
+let m_pages = 0;
 async function getExpensesMonthly(e){
     let year_list = document.querySelector('#yearlist');
     let year = year_list.value;
 
+    let m_pg_btn_1 = document.querySelector('#m_pg_btn_1');
+    let m_pg_btn_2 = document.querySelector('#m_pg_btn_2');
+    m_pg_btn_1.disabled = false;
+    m_pg_btn_2.disabled = false;
+
     document.querySelector('#tbody-monthly').innerHTML = ``;
-    await new Promise((res, rej) => {
-        setTimeout(() => {
-            res('timer');
-        }, 800);
-    });
-    if(e.type!='DOMContentLoaded')
+    await wait('#tbody-monthly');
+    if(e.type!='DOMContentLoaded' && e.target.parentElement.id === 'monthlist')
     {
         currMonth = e.target.attributes.value.nodeValue
         console.log(currMonth);
+        m_prev_page = 0;
+        m_curr_page = 1;
+        m_next_page = 2;
+        m_pages = 0;
     }
+
+    let m_pg_btn_value = m_curr_page;
+
+    if(e.type !== 'DOMContentLoaded' && e.target.parentElement.id !== 'monthlist'){
+        if(e.target.id === 'm_pg_btn_next'){
+            m_prev_page = m_curr_page;
+            m_curr_page = m_curr_page + 1;
+            m_next_page = m_curr_page + 1;
+            m_pg_btn_value = m_curr_page;
+            console.log(m_prev_page, m_curr_page, m_next_page);
+        }
+        else if(e.target.id === 'm_pg_btn_last'){
+            m_pg_btn_value = m_pages;
+        }
+        else{
+            m_pg_btn_value = e.target.innerHTML;
+            m_curr_page = Number(m_pg_btn_value);
+            m_prev_page = m_curr_page - 1;
+            m_next_page = m_curr_page + 1;
+            console.log(m_prev_page, m_curr_page, m_next_page);
+        }
+    }
+
     var month;
     try{
-        const res = await axios.get(`${backend_url}/user/expenses/monthly-expenses/${currMonth}/${year}`, {headers: {"Authorization": token}});
+
+
+        const res = await axios.get(`${backend_url}/user/expenses/monthly-expenses/${currMonth}/${year}?page=${m_pg_btn_value}`, {headers: {"Authorization": token}});
         month = moment().month(currMonth-1).format('MMMM');
         if(res.status!==200)
             throw new Error(res.data.error);
-        if(res.data.expenses.length==0)
+        // console.log(res.data);
+        m_pages = res.data.pages;
+        pagination(m_pages, m_curr_page, m_pg_btn_next, m_pg_btn_last);
+        
+      
+        if(m_pg_btn_value>2 && e.target.id !== 'm_pg_btn_last'){
+            m_pg_btn_1.innerHTML = m_prev_page;
+            m_pg_btn_2.innerHTML = m_curr_page;
+        }
+
+        if(e.target.id==='m_pg_btn_1')
+            if(Number(m_pg_btn_value)>1){
+                m_pg_btn_1.innerHTML = m_prev_page;
+                m_pg_btn_2.innerHTML = m_curr_page;
+            }
+
+        
+            if(m_pages===1)
+                m_pg_btn_2.disabled = true;
+
+        if(res.data.expenses.length==0){
+            m_pg_btn_1.disabled = true;
+            m_pg_btn_2.disabled = true;
             throw new Error('No expenses for '+month);
-            document.querySelector('#tbody-monthly').innerHTML = ''
+        }
+
+
+
+        document.querySelector('#tbody-monthly').innerHTML = ''
         fillTables(res.data.expenses, '#tbody-monthly', 3);
     }
     catch(err){
-        showError(err.message)
+        console.log(err);
+        showError(err.message);
     }
     finally{
         document.querySelector('#cap_month').innerHTML = month;
     }
+}
+
+function pagination(pages, curr_page, pg_btn_next, pg_btn_last){
+    if(pages<=2 || curr_page>=pages){
+        pg_btn_next.disabled = true;
+        pg_btn_last.disabled = true;
+    }
+    else{
+        pg_btn_next.disabled = false;
+        pg_btn_last.disabled = false;
+    }
+
+    pg_btn_last.innerHTML = 'Last Page - '+pages;
 }
 
 function logOut(){
@@ -153,28 +262,87 @@ function logOut(){
 }
 
 //getting yearly expenses
-var currYear;
+var currYear = moment().year();
+let y_prev_page = 0;
+let y_curr_page = 1;
+let y_next_page = 2;
+let y_pages = 0;
 async function getYearlyExpenses(e){
     currYear = moment().year();
-    console.log(currYear)
-    document.querySelector('#tbody-yearly').innerHTML = ``;
-    await new Promise((res, rej) => {
-        setTimeout(() => {
-            res('timer');
-        }, 800);
-    });
-    if(e.type!='DOMContentLoaded')
+    console.log(currYear);
+
+    let y_pg_btn_1 = document.querySelector('#y_pg_btn_1');
+    let y_pg_btn_2 = document.querySelector('#y_pg_btn_2');
+    y_pg_btn_1.disabled = false;
+    y_pg_btn_2.disabled = false;
+
+    await wait('#tbody-yearly')
+
+    if(e.type!='DOMContentLoaded' && e.target.parentElement.id === 'yearlist2')
     {
         currYear = e.target.attributes.value.nodeValue
+        y_prev_page = 0;
+        y_curr_page = 1;
+        y_next_page = 2;
+        y_pages = 0;
         console.log(currYear);
     }
+
+    let y_pg_btn_value = y_curr_page;
+
+    if(e.type!='DOMContentLoaded' && e.target.parentElement.id !== 'yearlist2')
+    {
+       if(e.target.id === 'y_pg_btn_next'){
+         y_prev_page = y_curr_page;
+         y_curr_page = y_curr_page + 1;
+         y_next_page = y_curr_page + 1;
+         y_pg_btn_value = y_curr_page;
+         console.log(y_prev_page, y_curr_page, y_next_page)
+       }
+       else if(e.target.id === 'y_pg_btn_last'){
+        y_pg_btn_last = y_pages;
+       }
+       else{
+        y_pg_btn_value = e.target.innerHTML;
+        y_curr_page = Number(y_pg_btn_value);
+        y_prev_page = y_curr_page - 1;
+        y_next_page = y_curr_page + 1;
+        console.log(y_prev_page, y_curr_page, y_next_page);
+       }
+    }
+
+
+
     try{
-        const res = await axios.get(`${backend_url}/user/expenses/yearly-expenses/${currYear}`, {headers: {"Authorization": token}});
+        console.log('value', y_pg_btn_value);
+        const res = await axios.get(`${backend_url}/user/expenses/yearly-expenses/${currYear}?page=${y_pg_btn_value}`, {headers: {"Authorization": token}});
         year = moment().year(currYear).format('YYYY');
         if(res.status!==200)
             throw new Error(res.data.error);
-        if(res.data.expenses.length===0)
+       
+        y_pages = res.data.pages;
+        console.log('pages', y_pages)
+        pagination(y_pages, y_curr_page, y_pg_btn_next, y_pg_btn_last);
+
+        if(y_pg_btn_value>2 && e.target.id !== 'y_pg_btn_last'){
+            y_pg_btn_1.innerHTML = y_prev_page;
+            y_pg_btn_2.innerHTML = y_curr_page;
+        }
+
+        if(e.target.id === 'y_pg_btn_1')
+            if(Number(y_pg_btn_value)>1){
+                y_pg_btn_1.innerHTML = y_prev_page;
+                y_pg_btn_2.innerHTML = y_curr_page;
+            }
+
+            if(y_pages===1)
+            y_pg_btn_2.disabled = true;
+
+        if(res.data.expenses.length===0){
+            y_pg_btn_1.disabled = true;
+            y_pg_btn_2.disabled = true;
             throw new Error(`No Expenses for year ${currYear}`);
+        }
 
         document.querySelector('#tbody-yearly').innerHTML = '';
         fillTables(res.data.expenses, '#tbody-yearly', 1);
@@ -290,17 +458,88 @@ async function downloadYearlyExpenses(){
     }
 }
 
-async function showHistory(){
+async function wait(id){
+    document.querySelector(id).innerHTML = '';
+    await new Promise((res, rej) => {
+        setTimeout(() => {
+            res('timer');
+        }, 800);
+    });
+}
+
+let h_prev_page = 0;
+let h_curr_page = 1;
+let h_next_page = 2;
+let h_pages = 0;
+async function showHistory(e){
     let tbody_downloads = document.querySelector('#tbody-download');
     tbody_downloads.innerHTML = '';
     document.querySelector('#downloads-section').style.display = 'block';
 
+    let h_pg_btn_1 = document.querySelector('#h_pg_btn_1');
+    let h_pg_btn_2 = document.querySelector('#h_pg_btn_2');
+    h_pg_btn_1.disabled = false;
+    h_pg_btn_2.disabled = false;
+
+    await wait('#tbody-download');
+
+    let h_pg_btn_value = h_curr_page;
+
+    if(e.target.id !== 'downloads'){
+        if(e.target.id == 'h_pg_btn_next'){
+            h_prev_page = h_curr_page;
+            h_curr_page = h_curr_page + 1;
+            h_next_page = h_curr_page + 1;
+            h_pg_btn_value = h_curr_page;
+            console.log(h_prev_page, h_curr_page, h_next_page);
+        }
+        else if(e.target.id === 'h_pg_btn_last'){
+            h_pg_btn_last = h_pages;
+        }
+        else{
+            h_pg_btn_value = e.target.innerHTML;
+            h_curr_page = Number(h_pg_btn_value);
+            h_prev_page = h_curr_page - 1;
+            h_next_page = h_curr_page + 1;
+            console.log(h_prev_page, h_curr_page, h_next_page);
+        }
+    }
+
     try{
-        let res = await axios.get(`${backend_url}/user/expenses/getDownloads`, {headers: {"Authorization": token}});
+        let res = await axios.get(`${backend_url}/user/expenses/getDownloads?page=${h_pg_btn_value}`, {headers: {"Authorization": token}});
         // console.log(res.data);
-        if(res.status!==200)
+        
+        h_pages = res.data.pages;
+        console.log('h_pages', h_pages);
+
+        pagination(h_pages, h_curr_page, h_pg_btn_next, h_pg_btn_last);
+
+        if(h_pg_btn_value>2 && e.target.id !== 'h_pg_btn_last'){
+            h_pg_btn_1.innerHTML = h_prev_page;
+            h_pg_btn_2.innerHTML = h_curr_page;
+        }
+
+        if(e.target.id === 'h_pg_btn_1')
+            if(Number(h_pg_btn_value)>1){
+                h_pg_btn_1.innerHTML = h_prev_page;
+                h_pg_btn_2.innerHTML = h_curr_page;
+            }  
+        
+        if(h_pages === 1)
+            h_pg_btn_2.disabled = true;
+
+        
+      
+        if(res.status!==200){
             throw new Error(res.data.error);
+        }
+
         let downloads = res.data.downloads;
+        if(downloads.length===0){
+            h_pg_btn_1.disabled = true;
+            h_pg_btn_2.disabled = true;
+            throw new Error(`No Downloads for year ${currYear}`);
+        }
         // console.log(downloads);
         for(let i=0;i<downloads.length;i++){
             let tr = document.createElement('tr');
@@ -309,7 +548,7 @@ async function showHistory(){
             let td1 = document.createElement('td');
             let a = document.createElement('a');
             a.href = downloads[i].url;
-            console.log(downloads[i].url);
+            // console.log(downloads[i].url);
             a.className = 'btn btn-sm btn-info';
             a.innerHTML = 'download'
             td1.appendChild(a);

@@ -49,7 +49,7 @@
 
         <h2 class="text-center text" style="color:darkturquoise;">Expenses Report</h2><br><br><br>
     <!-- ---------------------------------------------------------------------------------------- -->
-        <div class="col-xl-6 col-lg-6 col-md-1 col-sm-1">
+        <div class="g-5 col-xl-6 col-lg-6 col-md-1 col-sm-1">
           <button id="monthly" class="btn btn-outline-info">Download Report - Monthly</button>
 
           <div class="btn-group">
@@ -94,10 +94,17 @@
               </thead>
               <tbody id="tbody-monthly"></tbody>
             </table>
+            <div class="btn-group justify-content-end" role="group" aria-label="Basic example">
+              <button id="m_pg_btn_1" type="button" class="btn btn-outline-info">1</button>
+              <button id="m_pg_btn_2" type="button" class="btn btn-outline-info">2</button>
+              <button id="m_pg_btn_next" type="button" class="btn btn-outline-info">next</button>
+              <button id="m_pg_btn_last" type="button" class="btn btn-outline-info">Page - </button>
+            </div>
         </div>
+       
 <!-- ---------------------------------------------------------------------- -->
 
-          <div class="col-xl-6 col-lg-6 col-md-1 col-sm-1">
+          <div class="g-5 col-xl-6 col-lg-6 col-md-1 col-sm-1">
             <button id="yearly" class="btn btn-outline-info">Download Report - Yearly</button>
 
             <div style="float: right;" class="btn-group">
@@ -108,7 +115,6 @@
                 <li name="2023" class="dropdown-item" value="2023">2023</li>
                 <li name="2022" class="dropdown-item" value="2022">2022</li>
                 <li name="2021" class="dropdown-item" value="2021">2021</li>
-  
               </ul>
             </div>
             <br><br>
@@ -121,12 +127,17 @@
                 </tr>
               </thead>
               <tbody id="tbody-yearly">
-               
               </tbody>
             </table>
+            <div class="btn-group justify-content-end" role="group" aria-label="Basic example">
+              <button id="y_pg_btn_1" type="button" class="btn btn-outline-info">1</button>
+              <button id="y_pg_btn_2" type="button" class="btn btn-outline-info">2</button>
+              <button id="y_pg_btn_next" type="button" class="btn btn-outline-info">next</button>
+              <button id="y_pg_btn_last" type="button" class="btn btn-outline-info">Page - </button>
+            </div>
           </div>
-
-          <div class="col-12">
+          
+          <div class="g-5 col-12">
             <button id="downloads" class="btn btn-primary btn-md col-lg-3 col-md-3 col-auto">Show History</button><br><br>
             <div id="downloads-section" style="display: none;">
               <h4>Previous downloads</h4>
@@ -143,6 +154,12 @@
                 <tbody id="tbody-download">
                 </tbody>
               </table>
+              <div class="btn-group justify-content-end" role="group" aria-label="Basic example">
+                <button id="h_pg_btn_1" type="button" class="btn btn-outline-info">1</button>
+                <button id="h_pg_btn_2" type="button" class="btn btn-outline-info">2</button>
+                <button id="h_pg_btn_next" type="button" class="btn btn-outline-info">next</button>
+                <button id="h_pg_btn_last" type="button" class="btn btn-outline-info">Page - </button>
+              </div>
           </div>
           </div>
           

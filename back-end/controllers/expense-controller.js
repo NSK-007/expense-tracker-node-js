@@ -69,7 +69,7 @@ exports.deleteExpense = async (req, res, next) => {
 exports.getMonthlyExpenses = async (req, res, next) => {
     try{
         console.log('Monthly Expenses');
-        res.status(200).json({success: true, expenses: req.expenses});
+        res.status(200).json({success: true, expenses: req.expenses, pages: req.pages});
     }
     catch(err){
         console.log(err);
@@ -79,7 +79,7 @@ exports.getMonthlyExpenses = async (req, res, next) => {
 
 exports.getYearlyExpenses = async (req, res, next) => {
     try{
-        res.status(200).json({expenses: req.expenses});
+        res.status(200).json({expenses: req.expenses, pages: req.pages});
     }
     catch(err){
         console.log(err);
@@ -129,9 +129,14 @@ exports.addDownload = async (req, res, next) => {
 exports.getDownloads = async (req, res, next) => {
     console.log('getting downloads...');
     let user = req.user;
+    let page = req.query.page;
     try{
-        let downloads = await ExpenseServices.getUserDownloads(user);
-        res.status(200).json({success: true, downloads: downloads});
+        let downloads = await ExpenseServices.getUserDownloads(user, page);
+        let pages = await ExpenseServices.getUserDownloadsCount(user);
+        console.log(pages[0].dataValues.total_count)
+        pages = Math.ceil(pages[0].dataValues.total_count/5);
+        console.log(pages);
+        res.status(200).json({success: true, downloads: downloads, pages: pages});
     }
     catch(err){
         console.log(err);

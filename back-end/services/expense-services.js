@@ -29,8 +29,19 @@ const createDownloads = (user, obj, t) => {
     return user.createDownload({url: obj.fileURL, type: obj.type, timeline: obj.timeline}, {transaction: t});
 }
 
-const getUserDownloads = (user) => {
-    return user.getDownloads();
+const getUserDownloads = (user, page) => {
+    return user.getDownloads({
+        offset: Number(page-1)*5,
+        limit: 5
+    });
+}
+
+const getUserDownloadsCount = (user) => {
+    return user.getDownloads({
+        attributes:[
+            [sequelize.fn('COUNT', sequelize.col('id')), 'total_count']
+        ]
+    })
 }
 
 module.exports = {
@@ -40,5 +51,6 @@ module.exports = {
     updateExpense,
     createDownloads,
     getUserDownloads,
-    getExpensesTotalCount
+    getExpensesTotalCount,
+    getUserDownloadsCount
 }

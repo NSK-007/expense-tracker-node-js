@@ -169,8 +169,8 @@ async function getExpenses(e){
             throw new Error(items.data.error);
         // console.log(items);
         pages = items.data.pages;
-        let pg_btn_last = document.querySelector('#pg_btn_last');
-        if(pages<=2 || currPage>pages){
+        // let pg_btn_last = document.querySelector('#pg_btn_last');
+        if(pages<=2 || currPage>=pages){
             pg_btn_next.disabled = true;
             pg_btn_last.disabled = true;
         }
@@ -337,7 +337,7 @@ async function showLeaderBoard(e){
         }
         console.log(l_pg_btn_value);
         let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard?page=${l_pg_btn_value}`, {headers: {"Authorization": token}});
-        console.log(leaderboard_details.data);
+        // console.log(leaderboard_details.data);
         let users = leaderboard_details.data.expense_users;
 
         l_pages = leaderboard_details.data.pages;
@@ -367,7 +367,6 @@ async function showLeaderBoard(e){
             l_pg_btn2.innerHTML = l_currPage;
         }
     
-
         for(let i=0;i<users.length;i++){
             createNewTableRows(users[i])
         }
