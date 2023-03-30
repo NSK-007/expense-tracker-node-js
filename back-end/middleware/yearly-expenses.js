@@ -6,13 +6,14 @@ const yearly_expenses = async (req, res, next) => {
     try{
         let year = req.params.year;
         let page = req.query.page;
-        let limit = 0;
-        if(page === undefined){
+        let limit = req.query.limit;
+        console.log('yearly', limit, page)
+        if(page === undefined || limit === undefined){
             page = 1;
             limit = Number.MAX_SAFE_INTEGER;
         }
         else{
-            limit = 5;
+            limit = Number(limit);
         }
 
         console.log(year)
@@ -30,8 +31,8 @@ const yearly_expenses = async (req, res, next) => {
             },
             group: [sequelize.fn('MONTH', sequelize.col('createdAt'))],
             order: [['month', 'ASC']],
-            offset: Number(page - 1) * 5,
-            limit: 5
+            offset: Number(page - 1) * limit,
+            limit: limit
         });
         let exp_year_total_count = await Expense.findAll({
             attributes: [
@@ -49,7 +50,7 @@ const yearly_expenses = async (req, res, next) => {
         let pages = exp_year_total_count.length;
         console.log(pages);
         // console.log(expenses);
-        pages = Math.ceil(pages/5);
+        pages = Math.ceil(pages/limit);
         console.log('pages',pages);
         req.expenses = expenses;
         req.pages = pages;

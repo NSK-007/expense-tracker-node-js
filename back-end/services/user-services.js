@@ -14,8 +14,8 @@ const updateUser = (hash, user, t) => {
     return User.update({password: hash}, {where: {id: user[0].id}, transaction: t});
 }
 
-const findAllUsers = (page) => {
-    return User.findAll({attributes: ['name', 'totalExpense'], order: [['totalExpense', 'DESC']], offset:Number(page-1)*5, limit:5 });
+const findAllUsers = (obj) => {
+    return User.findAll({attributes: ['name', 'totalExpense'], order: [['totalExpense', 'DESC']], offset:Number(obj.page-1)*Number(obj.limit), limit:Number(obj.limit) });
 }
 
 const updateUserPremiumStatus = (t) => {

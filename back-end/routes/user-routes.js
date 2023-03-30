@@ -8,6 +8,8 @@ UserRouter.post('/signup', UserController.signUpUser);
 
 UserRouter.post('/loginUser', UserController.loginUser);
 
+UserRouter.get('/getUser', authenticate, UserController.getUser);
+
 UserRouter.get('/password/resetpassword/:uuid', PasswordController.resetPassword);
 
 UserRouter.post('/password/forgot-password', PasswordController.sendMail);

@@ -3,6 +3,18 @@ let backend_url = 'http://localhost:3000';
 let itemList = document.querySelector('#items');
 let logout = document.querySelector('#logout_btn');
 let leaderboard = document.querySelector('#leader-board');
+let user;
+let id;
+document.addEventListener('DOMContentLoaded', getUser);
+
+
+var expense_rows = document.querySelector('#numPages');
+expense_rows.addEventListener('change', changeLimit);
+var expense_limit;
+
+var leaderboard_rows = document.querySelector('#leaderboard-num-rows');
+leaderboard_rows.addEventListener('change', changeLimit);
+var leaderboard_limit;
 
 let pg_btn1 = document.querySelector('#pg_btn_1');
 let pg_btn2 = document.querySelector('#pg_btn_2');
@@ -164,7 +176,7 @@ async function getExpenses(e){
             }
            
         }
-        let items = await axios.get(`${backend_url}/user/get-expenses?page=${pg_btn_value}`, {headers: {"Authorization": token}});
+        let items = await axios.get(`${backend_url}/user/get-expenses?page=${pg_btn_value}&limit=${expense_limit}`, {headers: {"Authorization": token}});
         if(items.status !== 200)
             throw new Error(items.data.error);
         // console.log(items);
@@ -187,6 +199,10 @@ async function getExpenses(e){
           pg_btn1.innerHTML = prevPage;
           pg_btn2.innerHTML = currPage;
         }
+
+        if(pages===1)
+            pg_btn2.disabled = true;
+
 
         if(e.target.id==='pg_btn_1')
             if(Number(pg_btn_value)>1){
@@ -272,6 +288,26 @@ function checkAuthentication(){
     }
 }
 
+async function getUser(){
+    const token = localStorage.getItem('token');
+    try{
+        let res = await axios.get(`${backend_url}/user/getUser`, {headers: {"Authorization": token}});
+        user = res.data.name;
+        id = res.data.id;
+        console.log(user);
+        let e_limit = localStorage.getItem(`${user}_${id}_expense_rows_limit`);
+        let l_limit = localStorage.getItem(`${user}_${id}_leaderboard_rows_limit`);
+        expense_limit = e_limit !== null ? e_limit : 5;
+        leaderboard_limit = l_limit !== null ? l_limit : 5;
+
+        expense_rows.value = expense_limit;
+        leaderboard_rows.value = leaderboard_limit;
+    }
+    catch(err){
+        console.log(err);
+    }
+}
+
 async function checkPremium(){
     try{
         const token = localStorage.getItem('token');
@@ -336,7 +372,8 @@ async function showLeaderBoard(e){
             }
         }
         console.log(l_pg_btn_value);
-        let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard?page=${l_pg_btn_value}`, {headers: {"Authorization": token}});
+        console.log('l_limit', leaderboard_limit);
+        let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard?page=${l_pg_btn_value}&limit=${leaderboard_limit}`, {headers: {"Authorization": token}});
         // console.log(leaderboard_details.data);
         let users = leaderboard_details.data.expense_users;
 
@@ -361,11 +398,16 @@ async function showLeaderBoard(e){
           l_pg_btn2.innerHTML = l_currPage;
         }
 
+        if(l_pages === 1)
+            l_pg_btn2.disabled = true;
+
         if(e.target.id==='l_pg_btn_1')
         if(Number(l_pg_btn_value)>1){
             l_pg_btn1.innerHTML = l_prevPage;
             l_pg_btn2.innerHTML = l_currPage;
         }
+
+
     
         for(let i=0;i<users.length;i++){
             createNewTableRows(users[i])
@@ -378,7 +420,24 @@ async function showLeaderBoard(e){
     }
 }
 
+function changeLimit(e){
+    console.log('anything');
+    let e_id = e.target.id;
+    if(e_id === 'numPages'){
+        let expense_limit = expense_rows.value;
+        console.log('limit',expense_limit);
+        localStorage.setItem(`${user}_${id}_expense_rows_limit`, expense_limit);
+    }
+    else if(e_id === 'leaderboard-num-rows'){
+        let leaderboard_limit = leaderboard_rows.value;
+        console.log(leaderboard_limit);
+        localStorage.setItem(`${user}_${id}_leaderboard_rows_limit`, leaderboard_limit);
+    }   
+}
+
 async function logOut(){
     localStorage.removeItem('token');
     window.location.href = '../login/login.html';
 }
+
+

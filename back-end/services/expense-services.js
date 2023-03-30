@@ -1,7 +1,7 @@
 const sequelize = require("../util/database");
 
-const getExpenses = (user, page) => {
-    return user.getExpenses({offset:(Number(page-1))*5, limit:5});
+const getExpenses = (user, obj) => {
+    return user.getExpenses({offset:(Number(obj.page-1))*Number(obj.limit), limit:Number(obj.limit)});
 }
 
 const getExpensesTotalCount = (user) => {
@@ -29,10 +29,10 @@ const createDownloads = (user, obj, t) => {
     return user.createDownload({url: obj.fileURL, type: obj.type, timeline: obj.timeline}, {transaction: t});
 }
 
-const getUserDownloads = (user, page) => {
+const getUserDownloads = (user, page, limit) => {
     return user.getDownloads({
-        offset: Number(page-1)*5,
-        limit: 5
+        offset: Number(page-1)*limit,
+        limit: limit
     });
 }
 

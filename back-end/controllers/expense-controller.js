@@ -12,14 +12,15 @@ const S3Services = require('../services/s3-services');
 
 exports.getUserExpenses = async (req, res, next) => {
     try{
-        const page = req.query.page
+        const obj = req.query
+        console.log(obj);
         const currentUser = req.user;
         // console.log(page);
         // const expenses = await currentUser.getExpenses();
-        const expenses = await ExpenseServices.getExpenses(currentUser, page);
+        const expenses = await ExpenseServices.getExpenses(currentUser, obj);
         const total_no_of_rows = await ExpenseServices.getExpensesTotalCount(currentUser);
         // console.log(total_no_of_rows[0].dataValues.total_count);
-        let pages = Math.ceil(total_no_of_rows[0].dataValues.total_count/5);
+        let pages = Math.ceil(total_no_of_rows[0].dataValues.total_count/Number(obj.limit));
         // console.log(pages)
         res.status(200).json({expenses, pages});
     }
@@ -130,11 +131,12 @@ exports.getDownloads = async (req, res, next) => {
     console.log('getting downloads...');
     let user = req.user;
     let page = req.query.page;
+    let limit = Number(req.query.limit);
     try{
-        let downloads = await ExpenseServices.getUserDownloads(user, page);
+        let downloads = await ExpenseServices.getUserDownloads(user, page, limit);
         let pages = await ExpenseServices.getUserDownloadsCount(user);
         console.log(pages[0].dataValues.total_count)
-        pages = Math.ceil(pages[0].dataValues.total_count/5);
+        pages = Math.ceil(pages[0].dataValues.total_count/limit);
         console.log(pages);
         res.status(200).json({success: true, downloads: downloads, pages: pages});
     }

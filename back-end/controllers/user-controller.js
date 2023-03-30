@@ -69,3 +69,13 @@ exports.checkPremium = async (req, res, next) => {
         res.status(201).send({success: false, error: err.message});
     }
 }
+
+exports.getUser = async (req, res, next) => {
+    try{
+        res.status(200).json({success: true, id: req.user.id, name: req.user.name});
+    }
+    catch(err){
+        console.log(err);
+        res.status(201).send({success: false, error: err.message});
+    }
+}
