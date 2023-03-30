@@ -1,0 +1,17 @@
+.card{
+    top: 5rem;
+    flex-direction: row;
+}
+
+.card img{
+    width: 40%;
+}
+
+.container{
+    top: 50%;
+}
+
+.login-card{
+    left: 20rem;
+    width: 50%;
+}
