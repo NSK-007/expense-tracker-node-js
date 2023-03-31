@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk');
 const uploadToS3 = async (filename, expenses) => {
-    console.log('json',expenses);
     const BUCKET_NAME = process.env.BUCKET_NAME
     const IAM_USER_KEY = process.env.IAM_USER_KEY
     const IAM_USER_SECRET = process.env.IAM_USER_SECRET
@@ -13,7 +12,8 @@ const uploadToS3 = async (filename, expenses) => {
         Bucket: BUCKET_NAME,
         Key: filename,
         Body: expenses,
-        ACL: 'public-read'
+        // ACL: 'public-read'
+        ACL: process.env.ACL_VALUE
     }
 
     const s3_promise = new Promise((res, rej) => {
@@ -23,7 +23,6 @@ const uploadToS3 = async (filename, expenses) => {
                 rej(new Error(err.message));
             }
             else{
-                console.log(s3_res);
                 res(s3_res.Location);
             }
         });

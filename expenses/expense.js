@@ -162,7 +162,6 @@ async function getExpenses(e){
                 currPage = currPage+1;
                 nextPage = currPage+1;
                 pg_btn_value = currPage;
-                console.log(prevPage, currPage, nextPage);
             }
             else if(e.target.id === 'pg_btn_last'){
                 pg_btn_value = pages;
@@ -172,14 +171,13 @@ async function getExpenses(e){
                 currPage = Number(pg_btn_value);
                 prevPage = currPage-1;
                 nextPage = currPage+1;
-                console.log(prevPage, currPage, nextPage);
             }
            
         }
         let items = await axios.get(`${backend_url}/user/get-expenses?page=${pg_btn_value}&limit=${expense_limit}`, {headers: {"Authorization": token}});
+        console.log(items);
         if(items.status !== 200)
             throw new Error(items.data.error);
-        // console.log(items);
         pages = items.data.pages;
         // let pg_btn_last = document.querySelector('#pg_btn_last');
         if(pages<=2 || currPage>=pages){
@@ -216,6 +214,7 @@ async function getExpenses(e){
         }
     }
     catch(err){
+        console.log(err);
         showError(err.message);
     }
 }
@@ -240,10 +239,8 @@ async function deleteExpense(e){
 
 async function takePremium(e){
     const token = localStorage.getItem('token');
-    console.log('premium starting')
     try{
         const res = await axios.get(`${backend_url}/purchase/premium-membership`, {headers: {"Authorization": token}});
-        console.log(res);
         if(res.status!==200)
             throw new Error(res.data.error);
 
@@ -294,7 +291,6 @@ async function getUser(){
         let res = await axios.get(`${backend_url}/user/getUser`, {headers: {"Authorization": token}});
         user = res.data.name;
         id = res.data.id;
-        console.log(user);
         let e_limit = localStorage.getItem(`${user}_${id}_expense_rows_limit`);
         let l_limit = localStorage.getItem(`${user}_${id}_leaderboard_rows_limit`);
         expense_limit = e_limit !== null ? e_limit : 5;
@@ -345,7 +341,6 @@ let l_pages = 0;
 async function showLeaderBoard(e){
     try{
         await wait('#table-body');
-        console.log('leaderboard');
         let lb_section = document.querySelector('#leader-board-section');
         let t_body = document.querySelector('#table-body');
         t_body.innerHTML = '';
@@ -358,7 +353,6 @@ async function showLeaderBoard(e){
                 l_currPage = l_currPage+1;
                 l_nextPage = l_currPage+1;
                 l_pg_btn_value = l_currPage;
-                console.log(l_prevPage, l_currPage, l_nextPage)
             }
             else if(e.target.id === 'l_pg_btn_last'){
                 l_pg_btn_value = l_pages;
@@ -368,11 +362,8 @@ async function showLeaderBoard(e){
                 l_currPage = Number(l_pg_btn_value);
                 l_prevPage = l_currPage-1;
                 l_nextPage = l_currPage+1;
-                console.log(l_prevPage, l_currPage, l_nextPage);
             }
         }
-        console.log(l_pg_btn_value);
-        console.log('l_limit', leaderboard_limit);
         let leaderboard_details = await axios.get(`${backend_url}/premium/getLeaderboard?page=${l_pg_btn_value}&limit=${leaderboard_limit}`, {headers: {"Authorization": token}});
         // console.log(leaderboard_details.data);
         let users = leaderboard_details.data.expense_users;
@@ -421,16 +412,13 @@ async function showLeaderBoard(e){
 }
 
 function changeLimit(e){
-    console.log('anything');
     let e_id = e.target.id;
     if(e_id === 'numPages'){
         let expense_limit = expense_rows.value;
-        console.log('limit',expense_limit);
         localStorage.setItem(`${user}_${id}_expense_rows_limit`, expense_limit);
     }
     else if(e_id === 'leaderboard-num-rows'){
         let leaderboard_limit = leaderboard_rows.value;
-        console.log(leaderboard_limit);
         localStorage.setItem(`${user}_${id}_leaderboard_rows_limit`, leaderboard_limit);
     }   
 }

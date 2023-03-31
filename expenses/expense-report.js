@@ -1,14 +1,19 @@
 let backend_url = 'http://localhost:3000';
+const token = localStorage.getItem('token');
 document.addEventListener('DOMContentLoaded', getUser);
+let user;
+let id;
+var month_limit = localStorage.getItem(`${user}_${id}_month_rows_limit`);
+var year_limit = localStorage.getItem(`${user}_${id}_year_rows_limit`);
+var history_limit = localStorage.getItem(`${user}_${id}_history_rows_limit`);
+
 let logout = document.querySelector('#logout_btn');
 let month_list = document.querySelector('#monthlist');
 let year_list = document.querySelector('#yearlist2');
 let monthly_report = document.querySelector('#monthly');
 let yearly_report = document.querySelector('#yearly');
 const history = document.querySelector('#downloads');
-const token = localStorage.getItem('token');
-let user;
-let id;
+
 
 //month page buttons
 let m_pg_btn_1 = document.querySelector('#m_pg_btn_1');
@@ -45,15 +50,12 @@ h_pg_btn_last.addEventListener('click', showHistory);
 
 var month_rows = document.querySelector('#month-rows');
 month_rows.addEventListener('change', changeLimit);
-var month_limit;
 
 var year_rows = document.querySelector('#year-rows');
 year_rows.addEventListener('change', changeLimit);
-var year_limit;
 
 var history_rows = document.querySelector('#history-rows');
 history_rows.addEventListener('change', changeLimit);
-var history_limit;
 
 // -------------------------------------------------------
 
@@ -95,10 +97,8 @@ function showSuccess(err){
 
 //to initiate premium
 async function takePremium(e){
-    console.log('premium starting')
     try{
         const res = await axios.get(`${backend_url}/purchase/premium-membership`, {headers: {"Authorization": token}});
-        console.log(res);
         if(res.status!==200)
             throw new Error(res.data.error);
 
@@ -166,7 +166,6 @@ async function getUser(){
         let res = await axios.get(`${backend_url}/user/getUser`, {headers: {"Authorization": token}});
         user = res.data.name;
         id = res.data.id;
-        console.log(user);
         let m_limit = localStorage.getItem(`${user}_${id}_month_rows_limit`);
         let y_limit = localStorage.getItem(`${user}_${id}_year_rows_limit`);
         let h_limit = localStorage.getItem(`${user}_${id}_history_rows_limit`);
@@ -203,7 +202,6 @@ async function getExpensesMonthly(e){
     if(e.type!='DOMContentLoaded' && e.target.parentElement.id === 'monthlist')
     {
         currMonth = e.target.attributes.value.nodeValue
-        console.log(currMonth);
         m_prev_page = 0;
         m_curr_page = 1;
         m_next_page = 2;
@@ -218,7 +216,6 @@ async function getExpensesMonthly(e){
             m_curr_page = m_curr_page + 1;
             m_next_page = m_curr_page + 1;
             m_pg_btn_value = m_curr_page;
-            console.log(m_prev_page, m_curr_page, m_next_page);
         }
         else if(e.target.id === 'm_pg_btn_last'){
             m_pg_btn_value = m_pages;
@@ -228,13 +225,14 @@ async function getExpensesMonthly(e){
             m_curr_page = Number(m_pg_btn_value);
             m_prev_page = m_curr_page - 1;
             m_next_page = m_curr_page + 1;
-            console.log(m_prev_page, m_curr_page, m_next_page);
         }
     }
 
     var month;
     try{
-
+        await new Promise((res, rej) => 
+        {setTimeout(() => {res()}, 1000)}
+    );
 
         const res = await axios.get(`${backend_url}/user/expenses/monthly-expenses/${currMonth}/${year}?page=${m_pg_btn_value}&limit=${month_limit}`, {headers: {"Authorization": token}});
         month = moment().month(currMonth-1).format('MMMM');
@@ -306,7 +304,10 @@ let y_next_page = 2;
 let y_pages = 0;
 async function getYearlyExpenses(e){
     currYear = moment().year();
-    console.log(currYear);
+
+    await new Promise((res, rej) => 
+        {setTimeout(() => {res()}, 1000)}
+    );
 
     let y_pg_btn_1 = document.querySelector('#y_pg_btn_1');
     let y_pg_btn_2 = document.querySelector('#y_pg_btn_2');
@@ -322,7 +323,6 @@ async function getYearlyExpenses(e){
         y_curr_page = 1;
         y_next_page = 2;
         y_pages = 0;
-        console.log(currYear);
     }
 
     let y_pg_btn_value = y_curr_page;
@@ -334,7 +334,6 @@ async function getYearlyExpenses(e){
          y_curr_page = y_curr_page + 1;
          y_next_page = y_curr_page + 1;
          y_pg_btn_value = y_curr_page;
-         console.log(y_prev_page, y_curr_page, y_next_page)
        }
        else if(e.target.id === 'y_pg_btn_last'){
         y_pg_btn_value = y_pages;
@@ -344,21 +343,19 @@ async function getYearlyExpenses(e){
         y_curr_page = Number(y_pg_btn_value);
         y_prev_page = y_curr_page - 1;
         y_next_page = y_curr_page + 1;
-        console.log(y_prev_page, y_curr_page, y_next_page);
        }
     }
 
 
 
     try{
-        console.log('value', y_pg_btn_value);
+        console.log(y_pg_btn_value, year_limit);
         const res = await axios.get(`${backend_url}/user/expenses/yearly-expenses/${currYear}?page=${y_pg_btn_value}&limit=${year_limit}`, {headers: {"Authorization": token}});
         year = moment().year(currYear).format('YYYY');
         if(res.status!==200)
             throw new Error(res.data.error);
        
         y_pages = res.data.pages;
-        console.log('pages', y_pages)
         pagination(y_pages, y_curr_page, y_pg_btn_next, y_pg_btn_last);
 
         if(y_pg_btn_value>2 && e.target.id !== 'y_pg_btn_last'){
@@ -436,18 +433,15 @@ function fillTables(expenses, tbody_id, span_num){
 }
 
 async function addDownloads(fileURL, timeline, type){
-    console.log(fileURL);
     try{
         let res = await axios.post(`${backend_url}/user/expenses/add-download/`, {fileURL, type, timeline}, {headers: {"Authorization": token}});
         if(res.status===200){
             var a = document.createElement('a');
-            console.log('Executing', fileURL);
             a.href = fileURL;
             a.click();
         }
         if(res.status!==200)
             throw new Error(res.data.error);
-        console.log(res.data);
     }
     catch(err){
         console.log(err);
@@ -476,7 +470,6 @@ async function downloadMonthlyExpenses(e){
 async function downloadYearlyExpenses(){
     try{
         let year = currYear;
-        console.log(year)
         let res = await axios.get(`${backend_url}/user/expenses/downloadYearly/${year}`, {headers: {"Authorization": token}});
         if(res.status===200){
             var a = document.createElement('a');
@@ -528,10 +521,8 @@ async function showHistory(e){
             h_curr_page = h_curr_page + 1;
             h_next_page = h_curr_page + 1;
             h_pg_btn_value = h_curr_page;
-            console.log(h_prev_page, h_curr_page, h_next_page);
         }
         else if(e.target.id === 'h_pg_btn_last'){
-            console.log('last', h_pages);
             h_pg_btn_value = h_pages;
         }
         else{
@@ -539,17 +530,14 @@ async function showHistory(e){
             h_curr_page = Number(h_pg_btn_value);
             h_prev_page = h_curr_page - 1;
             h_next_page = h_curr_page + 1;
-            console.log(h_prev_page, h_curr_page, h_next_page);
         }
     }
 
     try{
-        console.log(h_pg_btn_value);
         let res = await axios.get(`${backend_url}/user/expenses/getDownloads?page=${h_pg_btn_value}&limit=${history_limit}`, {headers: {"Authorization": token}});
         // console.log(res.data);
         
         h_pages = res.data.pages;
-        console.log('h_pages', h_pages);
 
         pagination(h_pages, h_curr_page, h_pg_btn_next, h_pg_btn_last);
 
@@ -623,17 +611,14 @@ function changeLimit(e){
     let e_id = e.target.id;
     if(e_id === 'month-rows'){
         let month_limit = month_rows.value;
-        console.log('month limit', month_limit)
         localStorage.setItem(`${user}_${id}_month_rows_limit`, month_limit);
     }
     else if(e_id === 'year-rows'){
         let year_limit = year_rows.value;
-        console.log('year limit', year_limit);
         localStorage.setItem(`${user}_${id}_year_rows_limit`, year_limit);
     }
     else if(e_id === 'history-rows'){
         let history_limit = history_rows.value;
-        console.log('history limit', history_limit);
         localStorage.setItem(`${user}_${id}_history_rows_limit`, history_limit);
     }
 }

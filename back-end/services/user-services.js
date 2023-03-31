@@ -10,7 +10,6 @@ const createNewUser = (name, email, hash, t) => {
 }
 
 const updateUser = (hash, user, t) => {
-    console.log(user);
     return User.update({password: hash}, {where: {id: user[0].id}, transaction: t});
 }
 

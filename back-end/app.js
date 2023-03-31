@@ -11,10 +11,29 @@ const Order = require('./models/order-model');
 const LeaderBoardRouter = require('./routes/leaderboard-router');
 const ForgotPassword = require('./models/forgotpassword-model');
 const Download = require('./models/download-model');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const fs = require('fs');
+const path = require('path');
+const format = require('format-error').format;
 
 const app = express();
 app.use(cors());
+app.use(helmet());
+app.use(compression());
+
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    {flags: 'a'}
+);
+
+app.use(morgan('combined', {stream: accessLogStream}));
+
+
+
 app.use(bodyParser.json({extended:false}));
+
 app.use('/views', express.static('views'));
 
 app.use('/user', UserRouter);
@@ -42,5 +61,8 @@ sequelize
     })
     .catch(err => {
         console.log(err);
+        let error = format(err);
+        console.log(error)
+        fs.writeFile(path.join(__dirname, 'error.log'), error);
     })
 

@@ -20,11 +20,10 @@ exports.sendMail = async (req, res, next) => {
         let record = await PasswordService.createForgotpasswordRecord(user, t);
 
         const uuid = record.dataValues.id;
-        console.log(uuid);
 
         let mailTransporter = nodemailer.createTransport({
-            service: 'gmail',
-            host: "smtp.gmail.com",
+            service: process.env.SERVICE,
+            host: process.env.MAIL_HOST,
             port: 465,
             secure: true,
             auth: {
@@ -33,7 +32,7 @@ exports.sendMail = async (req, res, next) => {
             }
         });
 
-        let mailDetails = {
+        let mailDetails = { 
             from: process.env.EMAIL,
             to: gmail,
             subject: 'RESET PASSWORD',
@@ -48,7 +47,6 @@ exports.sendMail = async (req, res, next) => {
                 throw new Error(err.message)
             }
             else{
-                console.log('Email Sent');
                 res.status(200).json({success: true, message: 'Check your email to reset the password'});
             }
         });
@@ -85,7 +83,6 @@ exports.resetPassword = async (req, res, next) => {
 }
 
 exports.updatePassword = async (req, res, next) => {
-  console.log('updating password....')
   const t = await TransactionServices.transaction();
   try{
     let updatePasswordObj = req.body;

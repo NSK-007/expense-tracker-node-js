@@ -26,7 +26,7 @@ mailTransporter.sendMail(mailDetails, function(err, data){
         throw new Error(err.message)
     }
     else{
-        console.log('Email Sent');
+        // console.log('Email Sent');
         res.status(200).json({success: true, message: 'Check your email to reset the password'});
     }
 });

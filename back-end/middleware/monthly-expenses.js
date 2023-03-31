@@ -7,8 +7,6 @@ const monthly_expenses = async (req, res, next) => {
         let obj = req.params;
         let obj2 = req.query;
         let limit = 0;
-        // console.log('monthly ',page);
-        console.log('obj2', obj2);
         if(obj2.page===undefined){
             obj2.page = 1;
             limit = Number.MAX_SAFE_INTEGER;
@@ -45,7 +43,6 @@ const monthly_expenses = async (req, res, next) => {
         });
         let pages = exp_month_total_count[0];
         pages = Math.ceil(pages.dataValues.total_count/Number(obj2.limit));
-        console.log(pages);
         req.expenses = expenses;
         req.pages = pages;
         next();

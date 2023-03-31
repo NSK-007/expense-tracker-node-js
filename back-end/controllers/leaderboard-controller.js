@@ -22,7 +22,6 @@ exports.getLeaderBoard = async (req, res, next) => {
         //     order: [['totalExpense', 'DESC'] ]
         // })
         const obj = req.query;
-        console.log('obj',obj)
         const expense_users = await UserServices.findAllUsers(obj);
         const total_rows = await UserServices.getUsersTotalCount();
         const pages = Math.ceil(total_rows[0].dataValues.total_count/Number(obj.limit));
