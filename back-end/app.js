@@ -16,22 +16,22 @@ const compression = require('compression');
 const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(compression());
 
+const privateKey = fs.readFileSync('server.key');
+const certificate = fs.readFileSync('server.cert');
+
 const accessLogStream = fs.createWriteStream(
     path.join(__dirname, 'access.log'),
     {flags: 'a'}
 );
 
-
-
 app.use(morgan('combined', {stream: accessLogStream}));
-
-
 
 app.use(bodyParser.json({extended:false}));
 
@@ -59,6 +59,8 @@ sequelize
     .sync()
     .then(() => {
         app.listen(3000);
+        // https.createServer({key: privateKey, cert: certificate}, app)
+            // .listen(3000);
     })
     .catch(err => {
         console.log(err);
