@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const sequelize = require("../util/database");
 // const SIB = require('sib-api-v3-sdk');
+const format = require('format-error').format
+const ErrorLogger = require("../error-logger");
 require('dotenv').config();
 const TransactionServices = require('../services/transaction-services');
 const UserServices = require('../services/user-services');
@@ -24,7 +26,10 @@ exports.signUpUser = async (req, res, next) => {
         })
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\user error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).send({success:false, error:'User already exists'});
     }
@@ -51,7 +56,10 @@ exports.loginUser = async (req, res, next) => {
             throw new Error('Incorrect mail/user doesn\'t exist');
     }
     catch(err){
-        console.log(err)
+        // console.log(err)
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\user error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).send({success:false, error:err.message});
     }
@@ -66,6 +74,9 @@ exports.checkPremium = async (req, res, next) => {
             throw new Error('You are not a premium user');
     }
     catch(err){
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\user error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message});
     }
 }
@@ -75,7 +86,10 @@ exports.getUser = async (req, res, next) => {
         res.status(200).json({success: true, id: req.user.id, name: req.user.name});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\user error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message});
     }
 }

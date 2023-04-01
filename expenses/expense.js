@@ -179,7 +179,6 @@ async function getExpenses(e){
         if(items.status !== 200)
             throw new Error(items.data.error);
         pages = items.data.pages;
-        // let pg_btn_last = document.querySelector('#pg_btn_last');
         if(pages<=2 || currPage>=pages){
             pg_btn_next.disabled = true;
             pg_btn_last.disabled = true;
@@ -224,15 +223,18 @@ async function deleteExpense(e){
         let li = e.target.parentElement.parentElement;
         const id = e.target.id.substring(6);
         // console.log(id);
-        itemList.removeChild(li);
         const token = localStorage.getItem('token');
         try{
-            await axios.delete(`${backend_url}/user/expense/delete-expense/${id}`, {headers: {"Authorization": token}});
+            let res = await axios.delete(`${backend_url}/user/expense/delete-expense/${id}`, {headers: {"Authorization": token}});
+            console.log(res);
+            if(res.status!==200)
+                throw new Error(res.data.error);
+            itemList.removeChild(li);
             let lb_section = document.querySelector('#leader-board-section');
             lb_section.style.display = 'none';
         }
         catch(err){
-            showError('delete didn\'t happen');
+            showError(err.message);
         }
     }
 }

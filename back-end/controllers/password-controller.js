@@ -1,4 +1,6 @@
 require('dotenv').config();
+const format = require('format-error').format
+const ErrorLogger = require("../error-logger");
 const path = require('path');
 const rootDir =  path.dirname(process.mainModule.filename);
 const nodemailer = require('nodemailer');
@@ -54,7 +56,10 @@ exports.sendMail = async (req, res, next) => {
         await t.commit();
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\password error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).json({success: true, error: err.message});
     }
@@ -78,6 +83,9 @@ exports.resetPassword = async (req, res, next) => {
     }
     catch(err){
         console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\password error logs\\error.log`);
+        logger.error(error);
         res.send({success: false, error: err.message});
     }
 }
@@ -104,7 +112,10 @@ exports.updatePassword = async (req, res, next) => {
     });    
   }
   catch(err){
-    console.log(err);
+    // console.log(err);
+    let error = format(err);
+    const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\password error logs\\error.log`);
+    logger.error(error);
     res.status(201).send({success: false, error: err.message});
     await t.rollback();
   }

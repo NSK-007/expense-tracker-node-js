@@ -1,16 +1,11 @@
-const { Op, where } = require("sequelize");
-const Expense = require("../models/expense-model");
 const User = require("../models/user-model");
-const AWS = require('aws-sdk')
-const sequelize = require("../util/database");
-const monthly_expenses = require("../middleware/monthly-expenses");
 const converter = require('json-2-csv');
-const yearly_expenses = require("../middleware/yearly-expenses");
 const ExpenseServices = require('../services/expense-services');
 const TransactionServices = require('../services/transaction-services');
 const S3Services = require('../services/s3-services');
-const fs = require('fs');
+const ErrorLogger = require("../error-logger");
 const format = require('format-error').format
+require('dotenv').config();
 
 exports.getUserExpenses = async (req, res, next) => {
     try{
@@ -22,9 +17,10 @@ exports.getUserExpenses = async (req, res, next) => {
         res.status(200).json({expenses, pages});
     }
     catch(err){
-        // console.log(err);
         let error = format(err);
-        console.log(error);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
+        // console.log(error);
         res.status(201).json({success: false, error: err.message});
         res.end();
     }
@@ -41,7 +37,10 @@ exports.addExpense = async (req, res, next) => {
         res.status(200).json(expense);
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).send({success: false, error: err.message});
     }
@@ -59,7 +58,10 @@ exports.deleteExpense = async (req, res, next) => {
         res.status(200).send({success:true, message:'Expense Deleted'});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).json({success:false, error:'Expense Not Deleted'});
     }
@@ -70,7 +72,10 @@ exports.getMonthlyExpenses = async (req, res, next) => {
         res.status(200).json({success: true, expenses: req.expenses, pages: req.pages});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message})
     }
 }
@@ -80,7 +85,10 @@ exports.getYearlyExpenses = async (req, res, next) => {
         res.status(200).json({expenses: req.expenses, pages: req.pages});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message})
     }
 }
@@ -100,7 +108,10 @@ exports.downloadExpenses = async (req, res, next) => {
         res.status(200).json({success: true, fileURL, timeline});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message});
     }
 }
@@ -115,7 +126,10 @@ exports.addDownload = async (req, res, next) => {
         await t.commit();
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message});
         await t.rollback();
     }
@@ -132,7 +146,10 @@ exports.getDownloads = async (req, res, next) => {
         res.status(200).json({success: true, downloads: downloads, pages: pages});
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message});
     }
 }

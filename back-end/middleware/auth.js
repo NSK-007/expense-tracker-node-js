@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user-model');
 require('dotenv').config();
-
+const format = require('format-error').format
+const ErrorLogger = require("../error-logger");
 
 const authenticate = async (req, res, next) => {
     try{
@@ -17,8 +18,12 @@ const authenticate = async (req, res, next) => {
         next();
     }   
     catch(err){
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\authentication error logs\\error.log`);
+        logger.error(error);
         console.log(err)
         res.status(201).send({sucess:false, error:'Please log in to proceed'});
+        res.end();
     }
 }
 

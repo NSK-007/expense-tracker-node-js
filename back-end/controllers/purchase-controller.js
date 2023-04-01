@@ -1,5 +1,7 @@
 const Order = require('../models/order-model');
 const sequelize = require('../util/database');
+const format = require('format-error').format
+const ErrorLogger = require("../error-logger");
 require('dotenv').config();
 const TransactionServices = require('../services/transaction-services');
 const RazorpayServices = require('../services/razorpay-services');
@@ -14,6 +16,10 @@ exports.checkIfAlreadyPremium = async (req, res, next) => {
         next();
     }
     catch(err){
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\premium error logs\\error.log`);
+        logger.error(error);
+        console.log(error);
         res.status(201).send({success: false, error: err.message});
     }
 }
@@ -36,6 +42,9 @@ exports.purchasePremium = async (req, res, next) => {
     }
     catch(err){
         console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\premium error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).json({success: false, error: err.message});
     }
@@ -59,6 +68,9 @@ exports.updateTransactionStatus = async (req, res, next) => {
     }
     catch(err){
         console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\premium error logs\\error.log`);
+        logger.error(error);
         await t.rollback();
         res.status(201).send({success:false, message: err.message});
     }

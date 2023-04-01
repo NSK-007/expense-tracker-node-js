@@ -1,4 +1,6 @@
-const User = require("../models/user-model");
+const format = require('format-error').format
+const ErrorLogger = require("../error-logger");
+require('dotenv').config();
 const UserServices = require('../services/user-services')
 exports.getLeaderBoard = async (req, res, next) => {
     try{
@@ -28,7 +30,9 @@ exports.getLeaderBoard = async (req, res, next) => {
         res.status(200).json({expense_users, pages});
     }
     catch(err){
-        console.log(err);
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\leaderboard error logs\\error.log`);
+        logger.error(error);
         res.status(201).send({success: false, error: err.message});
     }
 }

@@ -1,6 +1,9 @@
 const { Op, Model } = require("sequelize");
 const Expense = require("../models/expense-model");
 const sequelize = require("../util/database");
+const ErrorLogger = require("../error-logger");
+const format = require('format-error').format
+require('dotenv').config();
 
 const monthly_expenses = async (req, res, next) => {
     try{
@@ -48,8 +51,11 @@ const monthly_expenses = async (req, res, next) => {
         next();
     }
     catch(err){
+        let error = format(err);
+        const logger = ErrorLogger(`${process.env.ERROR_LOG_BASE_PATH}\\back-end\\error logs\\expense error logs\\error.log`);
+        logger.error(error);
         console.log(err);
     }
 }
 
-module.exports = monthly_expenses;
+module.exports = monthly_expenses; 
